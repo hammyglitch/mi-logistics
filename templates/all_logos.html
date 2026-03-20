@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MI Logistics – Brand Review</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Barlow:wght@300;400;500&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --steel:#8fa3b1;--dark:#0d0d0d;--light:#f2f0eb;
+  --border:rgba(143,163,177,.18);--like:#5c9e72;
+  --dislike:#9e5c5c;--star:#f5c518;
+}
+html,body{width:100%;height:100%;background:#0d0d0d;color:var(--light);font-family:'Barlow',sans-serif;overflow:hidden}
+
+/* ═══════════════════════════════════════════════
+   SKY BACKGROUND — day/night 60s cycle
+═══════════════════════════════════════════════ */
+#sky{position:fixed;inset:0;z-index:0}
+
+/* Sky gradient animates through: dawn→day→dusk→night */
+@keyframes skyDay{
+  0%   {background:linear-gradient(180deg,#0a1628 0%,#1a2a3a 40%,#1a0a08 100%)}  /* pre-dawn */
+  10%  {background:linear-gradient(180deg,#ff6030 0%,#ffaa40 40%,#2a1808 100%)}  /* sunrise */
+  25%  {background:linear-gradient(180deg,#1a6ab0 0%,#4a9ad0 50%,#c8d8e8 100%)} /* morning */
+  45%  {background:linear-gradient(180deg,#1878c8 0%,#3898e0 50%,#c0d8f0 100%)} /* midday */
+  60%  {background:linear-gradient(180deg,#0a4880 0%,#2070b0 50%,#a0c0d8 100%)} /* afternoon */
+  72%  {background:linear-gradient(180deg,#e04010 0%,#e88030 40%,#200808 100%)} /* sunset */
+  80%  {background:linear-gradient(180deg,#100818 0%,#1a0a20 60%,#080408 100%)} /* dusk */
+  90%  {background:linear-gradient(180deg,#050510 0%,#0a0818 70%,#020208 100%)} /* night */
+  100% {background:linear-gradient(180deg,#0a1628 0%,#1a2a3a 40%,#1a0a08 100%)} /* back to dawn */
+}
+#sky{animation:skyDay 60s linear infinite}
+
+/* Stars — visible only at night phase */
+#stars{position:absolute;inset:0;pointer-events:none}
+.star-dot{position:absolute;border-radius:50%;background:#fff;animation:twinkle 2s ease-in-out infinite}
+@keyframes twinkle{0%,100%{opacity:.2}50%{opacity:.9}}
+
+/* Moon */
+#moon{
+  position:absolute;right:12%;top:8%;
+  width:34px;height:34px;border-radius:50%;
+  background:radial-gradient(circle at 35% 35%,#fffce8,#e8e0b0);
+  box-shadow:0 0 20px rgba(255,250,200,.4);
+  opacity:0;transition:none;
+  animation:moonPhase 60s linear infinite;
+}
+@keyframes moonPhase{
+  0%,8%{opacity:0} 80%{opacity:0} 82%{opacity:.9} 95%{opacity:.9} 98%{opacity:0} 100%{opacity:0}
+}
+
+/* Sun */
+#sun{
+  position:absolute;left:15%;top:12%;
+  width:44px;height:44px;border-radius:50%;
+  background:radial-gradient(circle,#fff8c0,#ffd020);
+  box-shadow:0 0 40px rgba(255,210,40,.6),0 0 80px rgba(255,200,0,.3);
+  animation:sunMove 60s linear infinite;
+}
+@keyframes sunMove{
+  0%  {left:5%;top:55%;opacity:0}
+  8%  {opacity:1}
+  10% {left:10%;top:35%}
+  45% {left:50%;top:6%}
+  70% {left:85%;top:35%}
+  74% {left:90%;top:55%;opacity:1}
+  78% {opacity:0}
+  100%{left:5%;top:55%;opacity:0}
+}
+
+/* ═══════════════════════════════════════════════
+   SCROLLING UK CITYSCAPE
+═══════════════════════════════════════════════ */
+#cityscape{
+  position:fixed;bottom:100px;left:0;z-index:1;
+  width:100%;height:280px;pointer-events:none;overflow:hidden;
+}
+.city-strip{
+  position:absolute;bottom:0;left:0;
+  display:flex;align-items:flex-end;gap:0;
+  animation:cityScroll 80s linear infinite;
+  will-change:transform;
+}
+.city-strip-2{
+  animation:cityScroll2 80s linear infinite;
+  animation-delay:-40s;
+}
+@keyframes cityScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+@keyframes cityScroll2{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* window flash animation */
+@keyframes winFlash{0%,100%{opacity:.15}50%{opacity:.7}}
+
+/* ═══════════════════════════════════════════════
+   ROAD & TRUCK STRIP
+═══════════════════════════════════════════════ */
+#road-strip{
+  position:fixed;bottom:0;left:0;right:0;z-index:3;
+  height:100px;overflow:hidden;pointer-events:none;
+}
+.road-surface{
+  position:absolute;bottom:0;left:0;right:0;height:100px;
+  background:linear-gradient(to bottom,#1c1c1c 0%,#141414 100%);
+  border-top:3px solid #2a2a2a;
+}
+.road-line{
+  position:absolute;top:48px;left:0;width:200%;height:4px;
+  background:repeating-linear-gradient(90deg,transparent 0,transparent 40px,rgba(255,220,0,.25) 40px,rgba(255,220,0,.25) 80px);
+  animation:rl 3s linear infinite;
+}
+@keyframes rl{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* MI sign posts along road */
+.mi-sign{
+  position:absolute;bottom:80px;
+  display:flex;flex-direction:column;align-items:center;
+  animation:signDrive linear infinite;
+}
+.mi-sign .post{width:4px;height:60px;background:#888}
+.mi-sign .board{
+  background:#003399;border:3px solid #fff;
+  color:#fff;font-family:'Barlow',sans-serif;
+  font-size:.6rem;font-weight:700;letter-spacing:.1em;
+  padding:4px 8px;white-space:nowrap;
+  text-align:center;margin-bottom:0;
+}
+@keyframes signDrive{0%{left:-80px}100%{left:110vw}}
+
+/* Trucks */
+.truck{position:absolute;bottom:6px;animation:truckMove linear infinite;will-change:transform}
+.truck.slow{animation-duration:20s}
+.truck.mid{animation-duration:14s}
+.truck.fast{animation-duration:9s}
+.truck.d0{animation-delay:0s}.truck.d1{animation-delay:-4s}.truck.d2{animation-delay:-8s}
+.truck.d3{animation-delay:-12s}.truck.d4{animation-delay:-2s}.truck.d5{animation-delay:-6s}
+@keyframes truckMove{0%{left:-420px}100%{left:110vw}}
+
+/* Night mode trucks — blue/red lights */
+.truck .cab-lights{display:none}
+body.night-mode .truck .cab-lights{display:block}
+body.night-mode .truck .trailer-body{fill:#0a1a3a!important;stroke:#1a3060!important}
+body.night-mode .truck .cab-body{fill:#0a1a3a!important;stroke:#1a3060!important}
+.truck .blue-light,.truck .red-light{
+  position:absolute;top:0;width:6px;height:6px;border-radius:50%;
+  animation:lightFlash .5s ease-in-out infinite;
+}
+.truck .blue-light{background:#4080ff;box-shadow:0 0 8px #4080ff;left:2px}
+.truck .red-light{background:#ff2020;box-shadow:0 0 8px #ff2020;right:2px;animation-delay:.25s}
+@keyframes lightFlash{0%,100%{opacity:0}50%{opacity:1}}
+
+/* ═══════════════════════════════════════════════
+   NIGHT MODE — dims the scene
+═══════════════════════════════════════════════ */
+#night-veil{
+  position:fixed;inset:0;z-index:2;
+  background:rgba(0,0,15,.0);pointer-events:none;
+  transition:background 4s ease;
+}
+body.night-mode #night-veil{background:rgba(0,0,15,.55)}
+
+/* ═══════════════════════════════════════════════
+   NAV
+═══════════════════════════════════════════════ */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;gap:14px;
+  padding:8px 20px;
+  background:rgba(8,8,8,.95);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+}
+nav img{height:30px;flex-shrink:0}
+.nav-links{display:flex;gap:14px;margin-left:auto}
+.nav-links a{color:var(--steel);font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;text-decoration:none;transition:color .2s}
+.nav-links a:hover{color:var(--light)}
+
+/* ── INLINE PLAYER (sits right of logo) ── */
+#nav-player{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(20,24,30,.85);
+  border:1px solid rgba(143,163,177,.18);
+  border-radius:20px;padding:5px 12px 5px 8px;
+  flex-shrink:0;max-width:340px;
+}
+#nav-vinyl{
+  width:28px;height:28px;border-radius:50%;flex-shrink:0;
+  background:conic-gradient(#1a1a1a 0deg,#252525 30deg,#1a1a1a 60deg,#252525 90deg,#1a1a1a 120deg,#252525 150deg,#1a1a1a 180deg,#252525 210deg,#1a1a1a 240deg,#252525 270deg,#1a1a1a 300deg,#252525 330deg);
+  position:relative;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 1px 6px rgba(0,0,0,.5);
+}
+#nav-vinyl::after{content:'';position:absolute;width:8px;height:8px;border-radius:50%;background:radial-gradient(circle,#5c9e72,#3a7050)}
+#nav-vinyl.spin{animation:vSpin 1.8s linear infinite}
+@keyframes vSpin{to{transform:rotate(360deg)}}
+.nav-song-info{display:flex;flex-direction:column;min-width:0}
+#nav-song-name{font-size:.6rem;color:var(--light);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:110px;letter-spacing:.04em}
+#nav-song-sub{font-size:.52rem;color:rgba(143,163,177,.45);letter-spacing:.1em}
+.nav-ctrl{background:none;border:none;cursor:pointer;color:var(--steel);font-size:13px;padding:2px 3px;transition:color .2s;line-height:1}
+.nav-ctrl:hover{color:var(--light)}
+.nav-ctrl.pp{font-size:15px;color:var(--like)}
+.nav-ctrl.muted{color:var(--dislike)}
+#nav-progress-wrap{width:70px;height:3px;background:rgba(143,163,177,.12);border-radius:2px;cursor:pointer;flex-shrink:0}
+#nav-progress-fill{height:100%;width:0%;background:var(--like);border-radius:2px;transition:width .5s linear}
+
+/* ═══════════════════════════════════════════════
+   CATEGORY TABS
+═══════════════════════════════════════════════ */
+.cat-tabs{
+  position:fixed;top:56px;left:0;right:0;z-index:90;
+  display:flex;justify-content:center;gap:5px;padding:8px 16px;
+  background:rgba(8,8,8,.9);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
+}
+.ctab{
+  padding:7px 20px;border:1px solid var(--border);
+  background:transparent;color:var(--steel);cursor:pointer;
+  font-family:'Barlow',sans-serif;font-size:.68rem;letter-spacing:.16em;
+  text-transform:uppercase;border-radius:2px;transition:all .2s;position:relative;
+}
+.ctab.active{background:var(--steel);color:var(--dark);border-color:var(--steel)}
+.ctab:hover:not(.active){background:rgba(143,163,177,.1);color:var(--light)}
+.ctab .pip{position:absolute;top:-4px;right:-4px;font-size:10px;display:none}
+.ctab.has-star .pip{display:block}
+
+/* ═══════════════════════════════════════════════
+   STAR BANNER
+═══════════════════════════════════════════════ */
+.star-banner{
+  position:fixed;top:104px;left:0;right:0;z-index:89;
+  display:flex;align-items:center;justify-content:center;gap:10px;padding:5px 16px;
+  background:rgba(5,5,5,.85);border-bottom:1px solid rgba(245,197,24,.12);
+  font-size:.65rem;letter-spacing:.1em;
+}
+.s-info{color:rgba(143,163,177,.45)}
+.s-info.on{color:var(--star)}
+.s-req{color:rgba(245,197,24,.55);text-transform:uppercase;animation:sreq 2s ease-in-out infinite}
+.s-req.done{animation:none;color:var(--like)}
+@keyframes sreq{0%,100%{opacity:.5}50%{opacity:1}}
+
+/* ═══════════════════════════════════════════════
+   SLIDER STAGE
+═══════════════════════════════════════════════ */
+.stage{
+  position:fixed;top:132px;bottom:104px;left:0;right:0;z-index:10;
+  display:flex;align-items:center;justify-content:center;
+}
+.arrow{
+  position:absolute;top:50%;transform:translateY(-50%);z-index:20;
+  width:48px;height:48px;background:rgba(0,0,0,.7);
+  border:1px solid rgba(143,163,177,.3);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--steel);font-size:20px;
+  transition:background .2s,color .2s,transform .1s;user-select:none;
+}
+.arrow:hover{background:var(--steel);color:var(--dark);transform:translateY(-50%) scale(1.08)}
+.arrow.left{left:16px}.arrow.right{right:16px}
+.arrow.dim{opacity:.2;pointer-events:none}
+
+.card-viewport{width:min(500px,80vw);position:relative}
+.card-viewport.truck-wide{width:min(675px,90vw)}
+
+/* ═══════════════════════════════════════════════
+   SLIDE CARD
+═══════════════════════════════════════════════ */
+.slide-card{
+  width:100%;background:rgba(10,12,16,.92);
+  border:1px solid var(--border);border-radius:4px;overflow:visible;position:relative;
+  box-shadow:0 16px 48px rgba(0,0,0,.8);
+  animation:sIn .3s cubic-bezier(.16,1,.3,1);
+}
+.slide-card.starred-card{border-color:rgba(245,197,24,.55);box-shadow:0 0 28px rgba(245,197,24,.12),0 16px 48px rgba(0,0,0,.8)}
+@keyframes sIn {from{transform:translateX(60px);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes sOut{from{transform:translateX(0);opacity:1}to{transform:translateX(-60px);opacity:0}}
+@keyframes sInL{from{transform:translateX(-60px);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes sOutR{from{transform:translateX(0);opacity:1}to{transform:translateX(60px);opacity:0}}
+
+/* Star badge */
+.card-star{
+  position:absolute;top:-11px;left:-11px;z-index:20;
+  font-size:24px;cursor:pointer;user-select:none;
+  filter:drop-shadow(0 2px 4px rgba(0,0,0,.9));transition:transform .2s;
+}
+.card-star:hover{transform:scale(1.2)}
+.card-star.off{opacity:.2}
+.card-star.on{opacity:1}
+@keyframes spinStar{0%{transform:scale(1) rotate(0)}30%{transform:scale(1.7) rotate(180deg)}65%{transform:scale(1.3) rotate(345deg)}100%{transform:scale(1) rotate(360deg)}}
+@keyframes unspinStar{0%{transform:scale(1) rotate(0)}50%{transform:scale(.5) rotate(-180deg)}100%{transform:scale(1) rotate(-360deg)}}
+.card-star.spin{animation:spinStar .55s cubic-bezier(.36,.07,.19,.97)}
+.card-star.unspin{animation:unspinStar .4s ease-out}
+
+/* Card image */
+.card-img{
+  width:100%;aspect-ratio:16/9;
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;cursor:pointer;position:relative;border-radius:4px 4px 0 0;
+}
+.card-img img{max-width:88%;max-height:100%;object-fit:contain;transition:transform .35s}
+.card-img.fb img{width:100%;height:100%;max-width:100%;object-fit:cover;object-position:center}
+.truck-wide .card-img.fb{aspect-ratio:3/1}
+.truck-wide .card-img.fb img{width:100%;height:100%;object-fit:fill}
+.slide-card:hover .card-img img{transform:scale(1.04)}
+.zoom-tag{position:absolute;bottom:7px;right:8px;font-size:10px;color:rgba(143,163,177,.35);opacity:0;transition:opacity .2s;background:rgba(0,0,0,.5);padding:2px 6px;border-radius:2px;pointer-events:none}
+.slide-card:hover .zoom-tag{opacity:1}
+
+/* Card body */
+.card-body{padding:12px 16px 14px;border-top:1px solid var(--border)}
+.card-title{font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:400;letter-spacing:.04em;margin-bottom:5px}
+.card-blurb{font-size:.72rem;color:var(--steel);line-height:1.65;letter-spacing:.02em;margin-bottom:12px}
+.vote-row{display:flex;gap:7px}
+.vbtn{flex:1;padding:9px 0;border:1px solid var(--border);background:transparent;cursor:pointer;font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;border-radius:2px;transition:background .2s,color .2s,border-color .2s}
+.vbtn.like{color:var(--like)}.vbtn.dislike{color:var(--dislike)}
+.vbtn.like:hover,.vbtn.like.active{background:var(--like);color:#fff;border-color:var(--like)}
+.vbtn.dislike:hover,.vbtn.dislike.active{background:var(--dislike);color:#fff;border-color:var(--dislike)}
+.vbtn:disabled{opacity:.3;cursor:default}
+.finish-btn{border-color:rgba(92,158,114,.5)!important;color:var(--like)!important}
+.finish-btn:hover{background:var(--like)!important;color:#fff!important;border-color:var(--like)!important}
+.voted-msg{font-size:.65rem;color:var(--steel);text-align:center;padding-top:5px;letter-spacing:.1em;min-height:14px}
+
+/* Dots */
+.dot-track{position:absolute;bottom:-22px;left:50%;transform:translateX(-50%);display:flex;gap:4px;align-items:center}
+.dot{width:5px;height:5px;border-radius:50%;background:rgba(143,163,177,.2);cursor:pointer;transition:background .2s,transform .2s}
+.dot.active{background:var(--steel);transform:scale(1.4)}
+.counter{position:absolute;bottom:-30px;left:50%;transform:translateX(-50%);font-size:.6rem;letter-spacing:.2em;color:rgba(143,163,177,.35);white-space:nowrap}
+
+/* ═══════════════════════════════════════════════
+   MODAL
+═══════════════════════════════════════════════ */
+#modal{display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.92);backdrop-filter:blur(10px);align-items:center;justify-content:center;padding:14px}
+#modal.open{display:flex}
+.mbox{background:#0c1014;border:1px solid rgba(143,163,177,.28);border-radius:4px;max-width:660px;width:100%;max-height:92vh;overflow:auto;position:relative;animation:mIn .22s cubic-bezier(.16,1,.3,1)}
+.mbox.starred{border-color:rgba(245,197,24,.5)}
+@keyframes mIn{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+.mimg{width:100%;aspect-ratio:16/10;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+.mimg img{max-width:88%;max-height:100%;object-fit:contain}
+.mimg.fb img{max-width:100%;height:100%;object-fit:cover}
+.m-star{position:absolute;top:11px;left:13px;z-index:5;font-size:24px;cursor:pointer;filter:drop-shadow(0 2px 5px rgba(0,0,0,.9));user-select:none;transition:transform .2s}
+.m-star:hover{transform:scale(1.15)}.m-star.off{opacity:.22}.m-star.on{opacity:1}
+.m-star.spin{animation:spinStar .55s cubic-bezier(.36,.07,.19,.97)}.m-star.unspin{animation:unspinStar .4s ease-out}
+.m-star-lbl{position:absolute;top:15px;left:44px;font-size:.55rem;color:rgba(245,197,24,.65);letter-spacing:.14em;text-transform:uppercase;pointer-events:none}
+.mclose{position:absolute;top:9px;right:10px;z-index:5;background:rgba(0,0,0,.65);border:1px solid rgba(143,163,177,.3);color:var(--steel);width:28px;height:28px;border-radius:50%;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s,color .2s}
+.mclose:hover{background:var(--steel);color:var(--dark)}
+.mbody{padding:14px 18px 18px;border-top:1px solid var(--border)}
+.mtitle{font-family:'Cormorant Garamond',serif;font-size:1.05rem;font-weight:400;letter-spacing:.04em;margin-bottom:6px}
+.mblurb{font-size:.73rem;color:var(--steel);line-height:1.72;margin-bottom:12px}
+.mvote{display:flex;gap:8px}
+.mvbtn{flex:1;padding:10px 0;border:1px solid var(--border);background:transparent;cursor:pointer;font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;border-radius:2px;transition:background .22s,color .22s,border-color .22s}
+.mvbtn.like{color:var(--like)}.mvbtn.dislike{color:var(--dislike)}
+.mvbtn.like:hover{background:var(--like);color:#fff;border-color:var(--like)}
+.mvbtn.dislike:hover{background:var(--dislike);color:#fff;border-color:var(--dislike)}
+.mvbtn:disabled{opacity:.35;cursor:default}
+.mvoted{text-align:center;padding-top:5px;font-size:.65rem;color:var(--steel);letter-spacing:.1em}
+
+/* ═══════════════════════════════════════════════
+   TIMED POPUPS
+═══════════════════════════════════════════════ */
+.tip-ov{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.82);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:18px}
+.tip-ov.open{display:flex}
+.tip-box{background:#0c1014;border:1px solid rgba(143,163,177,.3);border-radius:4px;max-width:520px;width:100%;padding:36px 40px 32px;text-align:center;animation:mIn .26s cubic-bezier(.16,1,.3,1)}
+.tip-box.gold{border-color:rgba(245,197,24,.4)}
+.tip-ico{font-size:3.2rem;display:block;margin-bottom:16px}
+.tip-box h2{font-family:'Cormorant Garamond',serif;font-weight:400;font-size:1.75rem;letter-spacing:.06em;color:var(--light);margin-bottom:14px}
+.tip-box p{font-size:.92rem;color:#b8c8d4;line-height:1.9;letter-spacing:.02em;margin-bottom:26px}
+.tip-box p strong{color:#fff;font-weight:500}
+.tip-dismiss{display:inline-block;padding:13px 44px;background:transparent;border:1px solid var(--steel);color:var(--light);font-family:'Barlow',sans-serif;font-size:.82rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:background .25s,color .25s}
+.tip-dismiss:hover{background:var(--steel);color:var(--dark)}
+
+/* TOAST */
+#toast{position:fixed;bottom:108px;left:50%;transform:translateX(-50%);background:rgba(18,18,18,.97);border:1px solid var(--border);color:var(--light);padding:9px 22px;font-size:.7rem;letter-spacing:.1em;border-radius:2px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:999}
+#toast.show{opacity:1}
+#toast.st{border-color:rgba(245,197,24,.5);color:var(--star)}
+
+/* TIMER BAR */
+.tbar{position:fixed;bottom:100px;left:0;right:0;z-index:15;height:2px;background:rgba(255,255,255,.04);display:none}
+.tbar-fill{height:100%;background:var(--steel);width:0%;transition:width 1s linear;opacity:.45}
+
+/* BG helpers */
+.bg-dark{background:#0d0d0d}.bg-white{background:#f5f5f5}.bg-light{background:#e8e4dc}
+.bg-mid{background:#1e2830}.bg-slate{background:#2a3540}.bg-green{background:#1a3020}
+.bg-grey{background:#252525}.bg-navy{background:#0f1a2e}
+</style>
+</head>
+<body>
+
+<!-- ═══════════ SKY ═══════════ -->
+<div id="sky">
+  <div id="stars"></div>
+  <div id="sun"></div>
+  <div id="moon"></div>
+</div>
+
+<div id="night-veil"></div>
+
+<!-- ═══════════ UK CITYSCAPE ═══════════ -->
+<div id="cityscape">
+  <div class="city-strip" id="cs1"></div>
+  <div class="city-strip city-strip-2" id="cs2"></div>
+</div>
+
+<!-- ═══════════ ROAD + TRUCKS ═══════════ -->
+<div id="road-strip">
+  <div class="road-surface"><div class="road-line"></div></div>
+  <!-- MI Signs -->
+  <div class="mi-sign" style="animation-duration:22s;animation-delay:0s"><div class="board">M1<br><span style="font-size:.45rem">NORTH</span></div><div class="post"></div></div>
+  <div class="mi-sign" style="animation-duration:22s;animation-delay:-10s"><div class="board">M1<br><span style="font-size:.45rem">SOUTH</span></div><div class="post"></div></div>
+  <div class="mi-sign" style="animation-duration:22s;animation-delay:-18s"><div class="board" style="background:#0a5c00">A1(M)</div><div class="post"></div></div>
+  <!-- Trucks injected by JS -->
+  <div id="truck-container"></div>
+</div>
+
+<!-- ═══════════ NAV ═══════════ -->
+<audio id="audio-el" preload="auto"></audio>
+
+<nav>
+  <img src="/static/logo.png" alt="MI Logistics">
+
+  <!-- INLINE MUSIC PLAYER -->
+  <div id="nav-player">
+    <div id="nav-vinyl"></div>
+    <div class="nav-song-info">
+      <div id="nav-song-name">M1 Track 4</div>
+      <div id="nav-song-sub">M1 Logistics Playlist</div>
+    </div>
+    <button class="nav-ctrl" onclick="navPrev()" title="Prev">⏮</button>
+    <button class="nav-ctrl pp" id="nav-pp" onclick="navTogglePlay()" title="Play/Pause">▶</button>
+    <button class="nav-ctrl" onclick="navNext()" title="Next">⏭</button>
+    <button class="nav-ctrl" id="nav-mute" onclick="navToggleMute()" title="Mute">🔊</button>
+    <div id="nav-progress-wrap" onclick="navSeek(event)">
+      <div id="nav-progress-fill"></div>
+    </div>
+  </div>
+
+  <div class="nav-links">
+    <a href="/">← Home</a>
+    <a href="/logos">Brand Concepts</a>
+    <a href="/results">Results</a>
+  </div>
+</nav>
+
+<!-- ═══════════ TABS ═══════════ -->
+<div class="cat-tabs">
+  <button class="ctab active" id="ctab-logos"  onclick="switchCat('logos',this)">Logo Ideas (21)<span class="pip">⭐</span></button>
+  <button class="ctab"        id="ctab-regal"  onclick="switchCat('regal',this)">Corporate &amp; Regal (15)<span class="pip">⭐</span></button>
+  <button class="ctab"        id="ctab-trucks" onclick="switchCat('trucks',this)">Truck Display (20)<span class="pip">⭐</span></button>
+</div>
+
+<!-- ═══════════ BANNER ═══════════ -->
+<div class="star-banner">
+  <span class="s-info" id="s-info">No favourite selected</span>
+  <span class="s-req"  id="s-req">★ MANDATORY — star your favourite in this category</span>
+</div>
+
+<!-- ═══════════ SLIDER ═══════════ -->
+<div class="stage">
+  <button class="arrow left"  id="btn-prev" onclick="navigate(-1)">&#8592;</button>
+  <div class="card-viewport" id="viewport"></div>
+  <button class="arrow right" id="btn-next" onclick="navigate(1)">&#8594;</button>
+</div>
+
+<!-- ═══════════ MODAL ═══════════ -->
+<div id="modal" onclick="bgClose(event)">
+  <div class="mbox" id="mbox">
+    <button class="mclose" onclick="closeM()">✕</button>
+    <div class="mimg" id="mimg">
+      <span class="m-star off" id="m-star" onclick="toggleStar(null,true)">★</span>
+      <span class="m-star-lbl" id="m-star-lbl">Tap to star</span>
+      <img id="m-img" src="" alt="">
+    </div>
+    <div class="mbody">
+      <div class="mtitle" id="m-title"></div>
+      <div class="mblurb" id="m-blurb"></div>
+      <div class="mvote">
+        <button class="mvbtn like"    id="m-like"    onclick="modalVote('like')">♥ Like</button>
+        <button class="mvbtn dislike" id="m-dislike" onclick="modalVote('dislike')">✕ Pass</button>
+      </div>
+      <div class="mvoted" id="m-voted"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ TIMED POPUPS ═══════════ -->
+<div class="tip-ov" id="tip0">
+  <div class="tip-box gold">
+    <span class="tip-ico">🎵</span>
+    <h2>M1 Logistics Playlist</h2>
+    <p>All songs in this playlist are <strong>made for and powered by M1 Logistics</strong>.<br><br>
+    Sit back, browse the brand concepts, and enjoy the music while you review.<br>We hope you love it as much as we did putting it together for you. ✨</p>
+    <button class="tip-dismiss" onclick="closeTip('tip0')">Enjoy — Let's Review!</button>
+  </div>
+</div>
+
+<div class="tip-ov" id="tip1">
+  <div class="tip-box gold">
+    <span class="tip-ico">★</span>
+    <h2>How to Star Your Favourite</h2>
+    <p>Look at the <strong>top-left corner of every tile</strong> — you'll see a <strong>★ star</strong>. Click it and it spins gold, marking that concept as your favourite in this category.<br><br>You must pick <strong>one star in each of the 3 categories</strong> before you can finish.<br><br>
+    <span style="color:rgba(245,197,24,.6);font-size:.85em">🎵 All songs in the playlist are made for and powered by M1 Logistics — enjoy!</span></p>
+    <button class="tip-dismiss" onclick="closeTip('tip1')">Got it — Continue</button>
+  </div>
+</div>
+
+<div class="tip-ov" id="tip2">
+  <div class="tip-box">
+    <span class="tip-ico">⭐⭐⭐</span>
+    <h2>3 Stars Required</h2>
+    <p>To finish and see your results you need <strong>one starred favourite</strong> in each category:<br><br>
+    <strong style="color:var(--star)">★ Logo Ideas &nbsp;·&nbsp; ★ Corporate &amp; Regal &nbsp;·&nbsp; ★ Truck Display</strong><br><br>
+    Once all three are selected, a <strong>Finish &amp; View Results</strong> button appears below Like and Pass.</p>
+    <button class="tip-dismiss" onclick="closeTip('tip2')">Continue Reviewing</button>
+  </div>
+</div>
+
+<div class="tbar" id="tbar"><div class="tbar-fill" id="tbar-fill"></div></div>
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════
+//  DATA
+// ═══════════════════════════════════════════
+const BG={'bg-dark':'#0d0d0d','bg-white':'#f5f5f5','bg-light':'#e8e4dc','bg-mid':'#1e2830','bg-slate':'#2a3540','bg-green':'#1a3020','bg-grey':'#252525','bg-navy':'#0f1a2e'};
+
+const CATS={
+  logos:[
+    {id:'l01',n:1, name:'Steel Woven Arrow',       src:'/static/logo_13_woven.png',    bg:'bg-white',blurb:'Intricate woven/braided letterforms with silver arrow. Commands authority. Premium print and embossing potential.'},
+    {id:'l02',n:2, name:'Circuit Board Teal',      src:'/static/logo_14_circuit2.png', bg:'bg-white',blurb:'Circuit MI with bold teal glow arrow. Tech-forward and clean. Strong at small digital sizes.'},
+    {id:'l03',n:3, name:'Globe Map Compact',       src:'/static/logo_15_globe.png',    bg:'bg-white',blurb:'Compact globe integrated with orbit arrow. Communicates international reach in a tight format.'},
+    {id:'l04',n:4, name:'Speed Swoosh',            src:'/static/logo_16_speed.png',    bg:'bg-white',blurb:'Aerodynamic speed lines with 3D chrome letterforms. Projects momentum. Classic logistics energy.'},
+    {id:'l05',n:5, name:'3D Architectural',        src:'/static/logo_17_3d.png',       bg:'bg-white',blurb:'Isometric 3D block construction. Structural solidity. Strong on vehicle livery.'},
+    {id:'l06',n:6, name:'Navy & Gold Arrows',      src:'/static/logo_18_navy_gold.png',bg:'bg-dark', blurb:'Bold navy with gold diagonal arrow sweep. Premium two-tone palette.'},
+    {id:'l07',n:7, name:'Royal Blue Speed',        src:'/static/logo_19_navy_blue.png',bg:'bg-dark', blurb:'Deep royal blue with concentric speed curves. Confident and corporate.'},
+    {id:'l08',n:8, name:'Teal Dark Circuit',       src:'/static/logo_20_teal_dark.png',bg:'bg-dark', blurb:'Dark base with teal circuit texture and glowing arrow. Strong social media impact.'},
+    {id:'l09',n:9, name:'Purple 3D Premium',       src:'/static/logo_21_purple.png',   bg:'bg-dark', blurb:'Bold purple gradient with architectural 3D letterforms. Memorable at a distance.'},
+    {id:'l10',n:10,name:'Chrome Red (RS Transit)', src:'/static/logo_01_chrome.png',   bg:'bg-dark', blurb:'Bold chrome red MI — aggressive and impactful. Great for social posts and truck-side display.'},
+    {id:'l11',n:11,name:'Steel Arrow (Clean)',     src:'/static/logo_09_steel.png',    bg:'bg-white',blurb:'Clean 3D chrome with upward arrow. Professional and timeless. Strong on white backgrounds.'},
+    {id:'l12',n:12,name:'Tech Circuit Glow',       src:'/static/logo_02_tech.png',     bg:'bg-dark', blurb:'Teal circuit-board MI with digital glow. Tech-forward operator positioning.'},
+    {id:'l13',n:13,name:'World Map Global',        src:'/static/logo_03_world.png',    bg:'bg-mid',  blurb:'Globe with trucks orbiting the MI mark. Communicates international multi-modal capability.'},
+    {id:'l14',n:14,name:'Union Jack Rope',         src:'/static/logo_04_uj_rope.png',  bg:'bg-dark', blurb:'Woven rope texture MI on Union Jack. British heritage, strength and reliability.'},
+    {id:'l15',n:15,name:'Geometric Tile',          src:'/static/logo_05_tile.png',     bg:'bg-light',blurb:'Ornate geometric tile pattern with warm earth tones. Highly distinctive.'},
+    {id:'l16',n:16,name:'Red Curtain Social',      src:'/static/logo_06_red.png',      bg:'bg-dark', blurb:'White MI on red with theatrical staging. Bold for social media.'},
+    {id:'l17',n:17,name:'Ornate Blue Mosaic',      src:'/static/logo_07_ornate.png',   bg:'bg-mid',  blurb:'Intricate blue and gold mosaic MI. Luxury positioning with artisan craftsmanship.'},
+    {id:'l18',n:18,name:'Silver 3D & Truck',       src:'/static/logo_08_silver.png',   bg:'bg-slate',blurb:'Metallic 3D letterforms with HGV truck silhouette. Strong for fleet livery.'},
+    {id:'l19',n:19,name:'Union Jack Compact',      src:'/static/logo_10_uj_small.png', bg:'bg-light',blurb:'Compact MI with Union Jack. Ideal for digital favicons and vehicle badges.'},
+    {id:'l20',n:20,name:'Union Jack Ornate',       src:'/static/logo_11_uj_ornate.png',bg:'bg-dark', blurb:'Decorative MI with Union Jack and arrow. Patriotic British operator.'},
+    {id:'l21',n:21,name:'London Skyline',          src:'/static/logo_12_london.png',   bg:'bg-mid',  blurb:'MI built from London skyline with purple arrow. Regional identity, national ambition.'},
+  ],
+  regal:[
+    {id:'r01',n:'C1',name:'Midnight Gold Crest',   css:true,cbg:'#080608',blurb:'Circular gold crest on near-black. Midnight luxury positioning. Exceptional for premium client folders and executive business cards.',
+     render:`<div style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:20px"><div style="width:90px;height:90px;border-radius:50%;background:linear-gradient(135deg,#1a120a,#2a1e0a);border:2px solid rgba(201,168,76,.6);display:flex;align-items:center;justify-content:center;box-shadow:0 0 30px rgba(201,168,76,.2)"><span style="font-family:'Playfair Display',serif;font-size:2.2rem;font-weight:700;background:linear-gradient(135deg,#8a6a1a,#fde98a,#c9a02a);-webkit-background-clip:text;-webkit-text-fill-color:transparent">MI</span></div><div style="width:60px;height:1px;background:linear-gradient(90deg,transparent,#c9a84c,transparent)"></div><div style="font-size:.5rem;letter-spacing:.55em;color:#c9a84c;text-transform:uppercase;opacity:.8">Logistics · Limited</div></div>`},
+    {id:'r02',n:'C2',name:'Steel Column Wordmark',  css:true,cbg:'#0a0e14',blurb:'Platinum column wordmark on deep blue-black. Stacked precision. Strong on white paper, metal badges, and embossed letterheads.',
+     render:`<div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:16px"><div style="font-family:'Playfair Display',serif;font-size:3rem;font-weight:700;letter-spacing:.18em;background:linear-gradient(160deg,#c8d0d8,#e8eef2,#a8b4bc,#dce4e8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1">MI</div><div style="width:80px;height:2px;background:linear-gradient(90deg,transparent,#8fa3b1,transparent);margin:2px 0"></div><div style="font-size:.45rem;letter-spacing:.7em;color:#8fa3b1;text-transform:uppercase">Logistics</div><div style="width:30px;height:1px;background:rgba(143,163,177,.3);margin:1px 0"></div><div style="font-size:.38rem;letter-spacing:.5em;color:rgba(143,163,177,.6);text-transform:uppercase">Limited</div></div>`},
+    {id:'r03',n:'C3',name:'Navy Heraldic Shield',    css:true,cbg:'#05101e',blurb:'Heraldic shield form in deep navy and gold. Centuries of merchant authority. Ideal for premium packaging and branded uniforms.',
+     render:`<div style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:16px"><div style="width:76px;height:88px;background:linear-gradient(160deg,#0f2040,#071530);border:2px solid rgba(201,168,76,.5);clip-path:polygon(0 0,100% 0,100% 75%,50% 100%,0 75%);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,.6)"><span style="font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;background:linear-gradient(135deg,#c9a84c,#fde98a,#c9a02a);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-top:-12px">MI</span></div><div style="font-size:.42rem;letter-spacing:.45em;color:rgba(201,168,76,.7);text-transform:uppercase">MI Logistics Limited</div></div>`},
+    {id:'r04',n:'C4',name:'Obsidian Diamond',        css:true,cbg:'#080a0e',blurb:'Diamond-cut geometric enclosure on obsidian. Precision engineering aesthetic for premium cargo and aerospace logistics.',
+     render:`<div style="display:flex;align-items:center;justify-content:center;padding:20px"><div style="position:relative;width:80px;height:80px;transform:rotate(45deg);background:linear-gradient(135deg,#0a1020,#1a2035);border:2px solid rgba(143,163,177,.4);box-shadow:0 0 24px rgba(143,163,177,.08)"><div style="position:absolute;inset:5px;border:1px solid rgba(143,163,177,.18)"></div><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;transform:rotate(-45deg);font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;background:linear-gradient(160deg,#c8d0d8,#e8eef2,#8fa3b1);-webkit-background-clip:text;-webkit-text-fill-color:transparent">MI</span></div></div>`},
+    {id:'r05',n:'C5',name:'Crimson Executive',       css:true,cbg:'#0e0204',blurb:'Deep crimson executive mark. Bold differentiation from all grey and blue competitors. High-energy for express freight and luxury sectors.',
+     render:`<div style="display:flex;flex-direction:column;align-items:center;gap:5px;padding:16px"><div style="font-family:'Playfair Display',serif;font-size:3.2rem;font-weight:700;letter-spacing:.1em;background:linear-gradient(135deg,#8a0a0a,#e83030,#c01010);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1">MI</div><div style="width:70px;height:2px;background:linear-gradient(90deg,transparent,rgba(200,30,30,.7),transparent)"></div><div style="font-size:.46rem;letter-spacing:.5em;color:rgba(200,80,80,.8);text-transform:uppercase">Logistics Limited</div></div>`},
+    {id:'r06',n:'C6',name:'Brushed Titanium',        css:true,cbg:'#111214',blurb:'Brushed titanium letterforms between vertical bars. Industrial precision. Outstanding on metal vehicle badges and depot frontage.',
+     render:`<div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:14px"><div style="padding:12px 20px;border-left:3px solid #8fa3b1;border-right:3px solid #8fa3b1"><div style="font-family:'Playfair Display',serif;font-size:2.8rem;font-weight:700;letter-spacing:.22em;background:linear-gradient(90deg,#6a7a82,#c8d4dc,#9aaab4,#e0e8ec,#7a8a92);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1">MI</div></div><div style="display:flex;align-items:center;gap:6px"><div style="height:1px;width:16px;background:rgba(143,163,177,.4)"></div><div style="font-size:.38rem;letter-spacing:.5em;color:rgba(143,163,177,.55);text-transform:uppercase">Logistics · Limited</div><div style="height:1px;width:16px;background:rgba(143,163,177,.4)"></div></div></div>`},
+    {id:'r07',n:'C7',name:'Forest Green Prestige',   css:true,cbg:'#030e08',blurb:'Forest green prestige mark. Environmental credibility and British land — perfect for green fleet and carbon-neutral logistics.',
+     render:`<div style="display:flex;flex-direction:column;align-items:center;gap:5px;padding:16px"><div style="padding:10px 18px;background:rgba(20,60,30,.8);border:1px solid rgba(60,140,80,.4);box-shadow:0 0 20px rgba(40,120,60,.1)"><div style="font-family:'Playfair Display',serif;font-size:2.8rem;font-weight:700;letter-spacing:.14em;background:linear-gradient(135deg,#2a6a38,#6aba78,#3a8a4a);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1">MI</div></div><div style="font-size:.42rem;letter-spacing:.48em;color:rgba(80,160,90,.6);text-transform:uppercase">Logistics Limited</div></div>`},
+    {id:'r08',n:'C8',name:'Ink & Gilt Serif',        css:true,cbg:'#06060a',blurb:'Ink black with gilt serif typesetting and establishment date. Heritage luxury. Outstanding for premium letterheads and anniversary branding.',
+     render:`<div style="display:flex;flex-direction:column;align-items:center;gap:3px;padding:16px"><div style="font-size:.38rem;letter-spacing:.55em;color:rgba(201,168,76,.5);text-transform:uppercase;margin-bottom:2px">Est. 2024</div><div style="font-family:'Playfair Display',serif;font-size:2.9rem;font-weight:700;letter-spacing:.08em;background:linear-gradient(160deg,#c9a84c 0%,#fde98a 40%,#b8882c 70%,#e8c860 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1">MI</div><div style="display:flex;align-items:center;gap:4px;margin-top:2px"><div style="height:1px;width:20px;background:rgba(201,168,76,.5)"></div><span style="font-size:.32rem;letter-spacing:.4em;color:rgba(201,168,76,.6);text-transform:uppercase">Logistics Limited</span><div style="height:1px;width:20px;background:rgba(201,168,76,.5)"></div></div></div>`},
+    {id:'r09',n:'C9',name:'Cobalt Prestige Band',    css:true,cbg:'#04081a',blurb:'Cobalt blue prestige band mark. Corporate trust and institutional gravitas. Strong for tender documents and contract headers.',
+     render:`<div style="display:flex;flex-direction:column;align-items:center;padding:10px 16px;gap:0"><div style="background:linear-gradient(90deg,#060e2a,#0e1e4a,#060e2a);border-top:2px solid rgba(100,140,220,.5);border-bottom:2px solid rgba(100,140,220,.5);padding:10px 24px;text-align:center"><div style="font-family:'Playfair Display',serif;font-size:2.6rem;font-weight:700;letter-spacing:.2em;background:linear-gradient(135deg,#4060c0,#80a0e8,#5070d0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1">MI</div><div style="font-size:.38rem;letter-spacing:.55em;color:rgba(120,160,220,.6);text-transform:uppercase;margin-top:3px">Logistics Limited</div></div></div>`},
+    {id:'r10',n:'C10',name:'Bronze Relief Monogram', css:true,cbg:'#0c0806',blurb:'Bronze relief monogram tile on rich mahogany. Artisan craftsmanship aesthetic. Perfect for premium courier and white-glove freight services.',
+     render:`<div style="display:flex;flex-direction:column;align-items:center;gap:5px;padding:16px"><div style="width:84px;height:84px;border-radius:4px;background:linear-gradient(135deg,#1e1208,#2e1c0c);border:1px solid rgba(180,100,20,.4);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;box-shadow:inset 0 1px 0 rgba(220,140,40,.2),0 4px 16px rgba(0,0,0,.6)"><div style="font-family:'Playfair Display',serif;font-size:2.1rem;font-weight:700;background:linear-gradient(135deg,#6a3c08,#c87820,#8a5010,#e09030);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1;letter-spacing:.1em">MI</div><div style="width:40px;height:1px;background:linear-gradient(90deg,transparent,rgba(180,100,20,.6),transparent)"></div><div style="font-size:.3rem;letter-spacing:.4em;color:rgba(180,100,20,.7);text-transform:uppercase">Ltd</div></div><div style="font-size:.4rem;letter-spacing:.45em;color:rgba(160,90,20,.5);text-transform:uppercase">MI Logistics</div></div>`},
+    {id:'r11',n:'C11',name:'Phantom Fleet — Truck Edition', css:true,cbg:'#05080d',blurb:'Dark luxury mark set against a phantom fleet silhouette. Where corporate authority meets the road. Designed for boardroom presentations and premium fleet proposals.',
+     render:`<div style="width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0;position:relative;overflow:hidden">
+      <!-- Ghost truck silhouette background -->
+      <svg style="position:absolute;bottom:0;left:0;width:100%;opacity:.18" viewBox="0 0 400 80" fill="none"><rect x="0" y="12" width="270" height="55" rx="2" fill="#8fa3b1" stroke="#8fa3b1" stroke-width="1"/><rect x="270" y="2" width="110" height="65" rx="4" fill="#6a8090"/><rect x="280" y="10" width="88" height="44" rx="2" fill="#4a6070" opacity=".6"/><circle cx="50" cy="71" r="11" fill="#444"/><circle cx="170" cy="71" r="11" fill="#444"/><circle cx="312" cy="71" r="12" fill="#444"/><circle cx="358" cy="71" r="12" fill="#444"/></svg>
+      <!-- Mark -->
+      <div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:5px;margin-bottom:20px">
+        <div style="font-family:'Playfair Display',serif;font-size:3.4rem;font-weight:700;letter-spacing:.16em;background:linear-gradient(160deg,#8aa0b0,#d0e0ec,#7090a0,#c0d4e4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1">MI</div>
+        <div style="display:flex;align-items:center;gap:6px"><div style="height:1px;width:24px;background:linear-gradient(90deg,transparent,rgba(143,163,177,.6))"></div><div style="font-size:.42rem;letter-spacing:.55em;color:rgba(143,163,177,.6);text-transform:uppercase">Logistics Limited</div><div style="height:1px;width:24px;background:linear-gradient(90deg,rgba(143,163,177,.6),transparent)"></div></div>
+        <div style="font-size:.32rem;letter-spacing:.3em;color:rgba(143,163,177,.35);text-transform:uppercase">Est. Sheffield · UK</div>
+      </div>
+     </div>`},
+    {id:'r12',n:'C12',name:'Gold Road — Prestige Fleet', css:true,cbg:'#06060a',blurb:'Gold-on-black prestige mark with a vanishing-point road extending beneath the monogram. Evokes the open motorway and premium logistics authority simultaneously.',
+     render:`<div style="width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:0">
+      <!-- Perspective road -->
+      <svg style="position:absolute;bottom:0;left:0;width:100%;opacity:.25" viewBox="0 0 400 100" fill="none">
+        <polygon points="200,0 400,100 0,100" fill="url(#rg)"/>
+        <defs><linearGradient id="rg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#c9a84c" stop-opacity=".2"/><stop offset="1" stop-color="#c9a84c" stop-opacity=".6"/></linearGradient></defs>
+        <line x1="200" y1="0" x2="200" y2="100" stroke="#c9a84c" stroke-width="1" stroke-dasharray="4 6" opacity=".4"/>
+        <line x1="200" y1="10" x2="0" y2="100" stroke="#c9a84c" stroke-width=".5" opacity=".2"/>
+        <line x1="200" y1="10" x2="400" y2="100" stroke="#c9a84c" stroke-width=".5" opacity=".2"/>
+        <!-- Tiny trucks on the road -->
+        <rect x="186" y="5" width="28" height="9" rx="1" fill="#c9a84c" opacity=".3"/>
+        <rect x="170" y="20" width="36" height="12" rx="1" fill="#c9a84c" opacity=".2"/>
+      </svg>
+      <div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:4px;margin-bottom:24px">
+        <div style="font-size:.35rem;letter-spacing:.6em;color:rgba(201,168,76,.45);text-transform:uppercase;margin-bottom:4px">Premium Logistics</div>
+        <div style="font-family:'Playfair Display',serif;font-size:3.2rem;font-weight:700;letter-spacing:.12em;background:linear-gradient(135deg,#8a6a1a,#fde98a,#c9a02a,#e8c860);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1">MI</div>
+        <div style="width:80px;height:2px;background:linear-gradient(90deg,transparent,#c9a84c,transparent);margin:2px 0"></div>
+        <div style="font-size:.4rem;letter-spacing:.5em;color:rgba(201,168,76,.65);text-transform:uppercase">Logistics · Limited</div>
+      </div>
+     </div>`},
+    {id:'r13',n:'C13',name:'Celestial Arc Monogram',    css:true,cbg:'#030510',blurb:'Deep space blue with celestial arc framing. Star-field background suggests limitless reach and precision delivery. Exceptional for premium annual reports and investor materials.',
+     render:`<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:16px">
+      <!-- Star field -->
+      <div style="position:absolute;inset:0">${Array.from({length:30},()=>{const x=Math.random()*100,y=Math.random()*100,s=Math.random()*.1+.05;return `<div style="position:absolute;left:${x}%;top:${y}%;width:${s}rem;height:${s}rem;border-radius:50%;background:#fff;opacity:${(Math.random()*.4+.1).toFixed(2)}"></div>`;}).join('')}</div>
+      <!-- Arc frame -->
+      <svg style="position:absolute;inset:0;width:100%;height:100%;opacity:.4" viewBox="0 0 200 180" fill="none">
+        <path d="M 20 140 A 80 80 0 0 1 180 140" stroke="url(#ag)" stroke-width="1.5" fill="none"/>
+        <defs><linearGradient id="ag" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#4060c0" stop-opacity="0"/><stop offset=".5" stop-color="#8090e0"/><stop offset="1" stop-color="#4060c0" stop-opacity="0"/></linearGradient></defs>
+        <circle cx="20" cy="140" r="3" fill="#6080d0" opacity=".6"/>
+        <circle cx="180" cy="140" r="3" fill="#6080d0" opacity=".6"/>
+      </svg>
+      <div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:4px">
+        <div style="font-family:'Playfair Display',serif;font-size:3rem;font-weight:700;letter-spacing:.15em;background:linear-gradient(135deg,#4060c0,#a0b8f0,#6080d0,#c0d0ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1">MI</div>
+        <div style="font-size:.38rem;letter-spacing:.55em;color:rgba(120,150,220,.6);text-transform:uppercase">Logistics Limited</div>
+        <div style="width:50px;height:1px;background:linear-gradient(90deg,transparent,rgba(120,150,220,.4),transparent);margin-top:2px"></div>
+      </div>
+     </div>`},
+    {id:'r14',n:'C14',name:'Empire Letterpress',         css:true,cbg:'#08050a',blurb:'Deep violet empire letterpress with ornamental corners. Stately, commanding, and unforgettable. The choice when no compromise is acceptable.',
+     render:`<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;padding:14px">
+      <div style="width:100%;max-width:180px;border:2px solid rgba(160,80,220,.35);padding:16px 20px;text-align:center;position:relative">
+        <!-- Corner ornaments -->
+        <div style="position:absolute;top:-2px;left:-2px;width:12px;height:12px;border-top:3px solid rgba(160,80,220,.6);border-left:3px solid rgba(160,80,220,.6)"></div>
+        <div style="position:absolute;top:-2px;right:-2px;width:12px;height:12px;border-top:3px solid rgba(160,80,220,.6);border-right:3px solid rgba(160,80,220,.6)"></div>
+        <div style="position:absolute;bottom:-2px;left:-2px;width:12px;height:12px;border-bottom:3px solid rgba(160,80,220,.6);border-left:3px solid rgba(160,80,220,.6)"></div>
+        <div style="position:absolute;bottom:-2px;right:-2px;width:12px;height:12px;border-bottom:3px solid rgba(160,80,220,.6);border-right:3px solid rgba(160,80,220,.6)"></div>
+        <div style="font-size:.3rem;letter-spacing:.55em;color:rgba(160,80,220,.45);text-transform:uppercase;margin-bottom:6px">● ● ●</div>
+        <div style="font-family:'Playfair Display',serif;font-size:2.8rem;font-weight:700;letter-spacing:.1em;background:linear-gradient(135deg,#7020b0,#c060f0,#9040d0,#d080ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1">MI</div>
+        <div style="width:60px;height:1px;background:linear-gradient(90deg,transparent,rgba(160,80,220,.5),transparent);margin:5px auto"></div>
+        <div style="font-size:.36rem;letter-spacing:.5em;color:rgba(160,80,220,.55);text-transform:uppercase">Logistics</div>
+        <div style="font-size:.28rem;letter-spacing:.4em;color:rgba(160,80,220,.35);text-transform:uppercase;margin-top:2px">Limited</div>
+        <div style="font-size:.3rem;letter-spacing:.55em;color:rgba(160,80,220,.3);text-transform:uppercase;margin-top:6px">● ● ●</div>
+      </div>
+     </div>`},
+  ],
+  trucks:[
+    {id:'t01',n:'T1', name:'Black — Centred Logo',        src:'/static/truck_01.png',bg:'bg-grey', fb:true,blurb:'Clean centred logo on black. Both sides show contact details symmetrically. Classic professional.'},
+    {id:'t02',n:'T2', name:'Black — Full Width Branding', src:'/static/truck_02.png',bg:'bg-grey', fb:true,blurb:'Bold full-width header "MI LOGISTICS LIMITED" on black. High visibility at distance.'},
+    {id:'t03',n:'T3', name:'Black — Large Text',          src:'/static/truck_03.png',bg:'bg-grey', fb:true,blurb:'Large "MI LOGISTICS & RS TRANSIT" headline dominates the trailer. Maximum road impact.'},
+    {id:'t04',n:'T4', name:'Green — Centred World MI',    src:'/static/truck_04.png',bg:'bg-green',fb:true,blurb:'Green trailer with world-map MI centre. Contact details flanking. Strong fleet identity.'},
+    {id:'t05',n:'T5', name:'Navy — Centred Monogram',     src:'/static/truck_05.png',bg:'bg-navy', fb:true,blurb:'Deep navy with centred silver MI monogram. Contact details both sides. Premium corporate.'},
+    {id:'t06',n:'T6', name:'Grey — Modern Stacking',      src:'/static/truck_06.png',bg:'bg-grey', fb:true,blurb:'Grey with bold yellow MI Logistics. Simple, modern, highly legible at speed.'},
+    {id:'t07',n:'T7', name:'Dark — Dynamic Direction',    src:'/static/truck_07.png',bg:'bg-grey', fb:true,blurb:'Dark grey with large MI watermark and framed company name. Adds gravitas and depth.'},
+    {id:'t08',n:'T8', name:'Silver — Corporate Columnar', src:'/static/truck_08.png',bg:'bg-grey', fb:true,blurb:'Silver left panel with gold MI mark, clean corporate text right. Premium B2B feel.'},
+    {id:'t09',n:'T9', name:'Black — Integrated Brand',    src:'/static/truck_09.png',bg:'bg-grey', fb:true,blurb:'MI letterforms merged with LOGISTICS wordmark. Bold integrated one-piece brand block.'},
+    {id:'t10',n:'T10',name:'Dark — Dynamic Alt',          src:'/static/truck_10.png',bg:'bg-grey', fb:true,blurb:'Alternate dark version. Grey MI on black with gold framing — powerful road presence.'},
+    {id:'t11',n:'T11',name:'Silver — Corporate Alt',      src:'/static/truck_11.png',bg:'bg-grey', fb:true,blurb:'Light silver trailer, dark left panel with gold MI. Elegant contrast for premium routes.'},
+    {id:'t12',n:'T12',name:'Green — Arrow Accent',        src:'/static/truck_12.png',bg:'bg-green',fb:true,blurb:'Dark green with triple green arrow accent. Environmental responsibility positioning.'},
+    {id:'t13',n:'T13',name:'Green — Clean Text',          src:'/static/truck_13.png',bg:'bg-green',fb:true,blurb:'Green trailer with white text and green contact details. Clean, approachable, memorable.'},
+    {id:'t14',n:'T14',name:'Grey — Red Route Map',        src:'/static/truck_14.png',bg:'bg-grey', fb:true,blurb:'Grey with world map background and red MI mark. Visual global reach with bold identity.'},
+    {id:'t15',n:'T15',name:'Blue — Woven Centred',        src:'/static/truck_15.png',bg:'bg-navy', fb:true,blurb:'Navy blue with ornate woven MI centre, contact details both sides. Distinguished premium look.'},
+    {id:'t16',n:'T16',name:'White — Icon Mosaic',         src:'/static/truck_16.png',bg:'bg-white',fb:true,blurb:'White trailer with logistics icon mosaic forming MI. Creative and memorable. Great for social.'},
+    {id:'t17',n:'T17',name:'Black — Gold Ornate',         src:'/static/truck_17.png',bg:'bg-grey', fb:true,blurb:'Black with gold ornate MI centre. Rich and bold. Top of market premium positioning.'},
+    {id:'t18',n:'T18',name:'Silver — Tech Circuit',       src:'/static/truck_18.png',bg:'bg-grey', fb:true,blurb:'Silver with teal circuit MI and glow arrow. Modern tech identity on a working HGV.'},
+    {id:'t19',n:'T19',name:'Green — Left Logo Block',     src:'/static/truck_19.png',bg:'bg-green',fb:true,blurb:'Green with logo-blocked left side and centre tagline. Strong and readable in traffic.'},
+    {id:'t20',n:'T20',name:'Green — Centred Globe Badge', src:'/static/truck_20.png',bg:'bg-green',fb:true,blurb:'Green with central globe-badge MI and symmetrical contact layout. Professional and clear.'},
+  ]
+};
+
+// ═══════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════
+const CAT_DB={logos:'logo-ideas',regal:'regal',trucks:'truck-display'};
+let curCat='logos',curIdx=0,dir=1;
+const starred={logos:null,regal:null,trucks:null};
+const voted={};
+let isNight=false;
+
+// ═══════════════════════════════════════════
+//  BUILD UK CITYSCAPE
+// ═══════════════════════════════════════════
+function buildCityscape(){
+  // SVG landmarks: Big Ben, Tower Bridge, London Eye, Gherkin, Shard, St Pauls, generic buildings
+  const svgs=[
+    // Big Ben
+    `<svg width="90" height="200" viewBox="0 0 90 200"><rect x="30" y="120" width="30" height="80" fill="#c8b898" stroke="#a09070" stroke-width="1"/><rect x="25" y="100" width="40" height="24" fill="#c8b898" stroke="#a09070" stroke-width="1"/><rect x="22" y="88" width="46" height="16" fill="#b0a080"/><polygon points="45,20 22,88 68,88" fill="#b09070"/><rect x="40" y="60" width="10" height="28" fill="#888"/><circle cx="45" cy="70" r="8" fill="none" stroke="#fff" stroke-width="1.5" opacity=".7"/><line x1="45" y1="70" x2="45" y2="63" stroke="#fff" stroke-width="1" opacity=".7"/><line x1="45" y1="70" x2="51" y2="70" stroke="#fff" stroke-width="1" opacity=".7"/></svg>`,
+    // Tower Bridge
+    `<svg width="220" height="160" viewBox="0 0 220 160"><rect x="40" y="40" width="28" height="120" fill="#b09070" stroke="#907050" stroke-width="1"/><rect x="152" y="40" width="28" height="120" fill="#b09070" stroke="#907050" stroke-width="1"/><rect x="0" y="120" width="220" height="40" fill="#2a2010"/><rect x="68" y="120" width="84" height="18" fill="#a08060"/><line x1="54" y1="40" x2="54" y2="0" stroke="#907050" stroke-width="2"/><line x1="166" y1="40" x2="166" y2="0" stroke="#907050" stroke-width="2"/><line x1="0" y1="120" x2="54" y2="0" stroke="#c8a870" stroke-width="2"/><line x1="220" y1="120" x2="166" y2="0" stroke="#c8a870" stroke-width="2"/><line x1="54" y1="0" x2="166" y2="0" stroke="#c8a870" stroke-width="2"/><polygon points="54,0 40,30 68,30" fill="#907050"/><polygon points="166,0 152,30 180,30" fill="#907050"/></svg>`,
+    // London Eye
+    `<svg width="110" height="180" viewBox="0 0 110 180"><circle cx="55" cy="70" r="60" fill="none" stroke="#888" stroke-width="3"/><circle cx="55" cy="70" r="48" fill="none" stroke="#666" stroke-width="1.5"/><line x1="55" y1="10" x2="55" y2="130" stroke="#666" stroke-width="1"/><line x1="5" y1="70" x2="105" y2="70" stroke="#666" stroke-width="1"/><line x1="18" y1="27" x2="92" y2="113" stroke="#666" stroke-width="1"/><line x1="18" y1="113" x2="92" y2="27" stroke="#666" stroke-width="1"/>${[0,45,90,135,180,225,270,315].map(a=>{const r=a*Math.PI/180;const x=55+48*Math.sin(r);const y=70-48*Math.cos(r);return `<rect x="${x-4}" y="${y-5}" width="8" height="10" rx="2" fill="rgba(100,180,255,.5)" stroke="#88c"/>`;}).join('')}<rect x="48" y="128" width="14" height="52" fill="#888"/></svg>`,
+    // The Shard
+    `<svg width="70" height="240" viewBox="0 0 70 240"><polygon points="35,0 70,240 0,240" fill="#c0d8f0" opacity=".8" stroke="#a0b8d0" stroke-width="1"/><polygon points="35,0 70,240 50,240" fill="#a0c0e0" opacity=".6"/><line x1="35" y1="0" x2="35" y2="240" stroke="#d0e8f8" stroke-width=".5" opacity=".4"/></svg>`,
+    // Gherkin (30 St Mary Axe)
+    `<svg width="60" height="200" viewBox="0 0 60 200"><ellipse cx="30" cy="90" rx="28" ry="90" fill="#88c0d0" stroke="#60a0b0" stroke-width="1"/><ellipse cx="30" cy="90" rx="28" ry="90" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="1"/>${[0,20,40,60,80,100,120,140,160].map(y=>`<line x1="${30-Math.sqrt(Math.max(0,784-(y-90)*(y-90)))+2}" y1="${y}" x2="${30+Math.sqrt(Math.max(0,784-(y-90)*(y-90)))-2}" y2="${y}" stroke="rgba(255,255,255,.1)" stroke-width="1"/>`).join('')}</svg>`,
+    // St Paul's
+    `<svg width="140" height="190" viewBox="0 0 140 190"><rect x="10" y="110" width="120" height="80" fill="#d0c0a0" stroke="#b0a080" stroke-width="1"/><rect x="20" y="90" width="100" height="24" fill="#c8b890"/><rect x="50" y="40" width="40" height="54" fill="#d0c0a0" stroke="#b0a080" stroke-width="1"/><ellipse cx="70" cy="40" rx="20" ry="20" fill="#c0b088" stroke="#a09068" stroke-width="2"/><polygon points="70,5 60,28 80,28" fill="#b09068"/><line x1="70" y1="0" x2="70" y2="10" stroke="#888" stroke-width="2"/></svg>`,
+    // Generic office blocks
+    `<svg width="60" height="160" viewBox="0 0 60 160"><rect x="0" y="0" width="60" height="160" fill="#2a3040" stroke="#3a4050" stroke-width="1"/>${Array.from({length:8},(_,r)=>Array.from({length:3},(_,c)=>`<rect x="${8+c*18}" y="${10+r*18}" width="10" height="12" fill="rgba(255,240,180,${Math.random()>.4?.6:.05})" rx="1"/>`).join('')).join('')}</svg>`,
+    `<svg width="45" height="120" viewBox="0 0 45 120"><rect x="0" y="0" width="45" height="120" fill="#1e2530" stroke="#2a3040" stroke-width="1"/>${Array.from({length:6},(_,r)=>Array.from({length:2},(_,c)=>`<rect x="${7+c*20}" y="${8+r*18}" width="12" height="10" fill="rgba(200,220,255,${Math.random()>.5?.5:.05})" rx="1"/>`).join('')).join('')}</svg>`,
+    `<svg width="80" height="200" viewBox="0 0 80 200"><rect x="0" y="0" width="80" height="200" fill="#252830" stroke="#353840" stroke-width="1"/>${Array.from({length:10},(_,r)=>Array.from({length:4},(_,c)=>`<rect x="${6+c*18}" y="${8+r*18}" width="10" height="12" fill="rgba(255,230,150,${Math.random()>.4?.5:.04})" rx="1"/>`).join('')).join('')}</svg>`,
+  ];
+  // Build two identical strips (seamless loop)
+  ['cs1','cs2'].forEach(id=>{
+    const strip=document.getElementById(id);
+    const content=svgs.concat(svgs).map(s=>`<div style="display:inline-block;vertical-align:bottom;margin:0 4px">${s}</div>`).join('');
+    strip.innerHTML=content+content;
+  });
+}
+
+// ═══════════════════════════════════════════
+//  BUILD TRUCKS WITH MI LOGO
+// ═══════════════════════════════════════════
+function buildTrucks(){
+  const tc=document.getElementById('truck-container');
+  const configs=[
+    {cls:'slow d0',y:'6px',scale:.9},{cls:'slow d2',y:'6px',scale:.9},
+    {cls:'mid d1',y:'4px',scale:1.0},{cls:'mid d4',y:'4px',scale:1.0},
+    {cls:'fast d3',y:'2px',scale:1.1},{cls:'fast d5',y:'2px',scale:1.1},
+  ];
+  configs.forEach(({cls,y,scale})=>{
+    const d=document.createElement('div');
+    d.className='truck '+cls;
+    d.style.bottom=y;
+    d.style.transform=`scale(${scale})`;
+    d.innerHTML=`
+    <div style="position:relative">
+      <div class="cab-lights" style="position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;padding:0 4px;z-index:2">
+        <div class="blue-light"></div><div class="red-light"></div>
+      </div>
+      <svg width="360" height="100" viewBox="0 0 360 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect class="trailer-body" x="0" y="22" width="248" height="68" rx="3" fill="#1c2435" stroke="#2c3445" stroke-width="1.5"/>
+        <rect class="cab-body" x="248" y="6" width="102" height="84" rx="5" fill="#232c3c" stroke="#2c3445" stroke-width="1.5"/>
+        <rect x="256" y="14" width="84" height="52" rx="3" fill="#162038" opacity=".8"/>
+        <!-- MI logo on trailer -->
+        <text x="80" y="65" font-family="Arial" font-size="22" font-weight="bold" fill="rgba(143,163,177,.7)" letter-spacing="2">MI</text>
+        <text x="114" y="65" font-family="Arial" font-size="9" fill="rgba(143,163,177,.4)" letter-spacing="1">LOGISTICS</text>
+        <path d="M 108 50 Q 140 40 162 52" stroke="rgba(143,163,177,.4)" stroke-width="1.5" fill="none"/>
+        <polygon points="164,52 156,46 163,56" fill="rgba(143,163,177,.4)"/>
+        <!-- Wheels -->
+        <circle cx="50" cy="93" r="12" fill="#111" stroke="#2c3445" stroke-width="2"/><circle cx="50" cy="93" r="6" fill="#1c1c1c"/>
+        <circle cx="160" cy="93" r="12" fill="#111" stroke="#2c3445" stroke-width="2"/><circle cx="160" cy="93" r="6" fill="#1c1c1c"/>
+        <circle cx="280" cy="93" r="13" fill="#111" stroke="#2c3445" stroke-width="2"/><circle cx="280" cy="93" r="7" fill="#1c1c1c"/>
+        <circle cx="320" cy="93" r="13" fill="#111" stroke="#2c3445" stroke-width="2"/><circle cx="320" cy="93" r="7" fill="#1c1c1c"/>
+        <!-- Headlights -->
+        <rect x="348" y="36" width="10" height="16" rx="2" fill="#fffde0" opacity=".6" class="day-headlight"/>
+        <rect x="0" y="38" width="8" height="14" rx="1" fill="#c9a84c" opacity=".5"/>
+      </svg>
+    </div>`;
+    tc.appendChild(d);
+  });
+}
+
+// ═══════════════════════════════════════════
+//  DAY / NIGHT DETECTION (from sky animation)
+// ═══════════════════════════════════════════
+function checkNightMode(){
+  // 60s cycle: night phase approx 78-98% = 46.8s-58.8s
+  const t=(Date.now()/1000)%60;
+  const night=(t>=46&&t<=60)||(t>=0&&t<=9);
+  if(night!==isNight){
+    isNight=night;
+    if(night)document.body.classList.add('night-mode');
+    else document.body.classList.remove('night-mode');
+  }
+}
+setInterval(checkNightMode,1000);
+
+// Generate stars
+function buildStars(){
+  const s=document.getElementById('stars');
+  for(let i=0;i<80;i++){
+    const d=document.createElement('div');
+    d.className='star-dot';
+    d.style.cssText=`left:${Math.random()*100}%;top:${Math.random()*60}%;width:${Math.random()*2+1}px;height:${Math.random()*2+1}px;animation-delay:${Math.random()*2}s;animation-duration:${1+Math.random()*2}s`;
+    s.appendChild(d);
+  }
+}
+
+// ═══════════════════════════════════════════
+//  RENDER SLIDE
+// ═══════════════════════════════════════════
+function renderSlide(idx,direction){
+  const list=CATS[curCat];
+  const item=list[idx];
+  const vp=document.getElementById('viewport');
+  const isStarred=starred[curCat]===item.id;
+  const v=voted[item.id];
+  const allStarred=starred.logos&&starred.regal&&starred.trucks;
+
+  const imgBlock=item.css
+    ?`<div class="card-img" style="background:${item.cbg};cursor:pointer" onclick="openModal()"><div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center">${item.render}</div><span class="zoom-tag">⤢ Click to enlarge</span></div>`
+    :`<div class="card-img ${item.bg}${item.fb?' fb':''}" onclick="openModal()"><img src="${item.src}" alt="${item.name}"><span class="zoom-tag">⤢ Click to enlarge</span></div>`;
+
+  const html=`<div class="slide-card${isStarred?' starred-card':''}" id="slide-card">
+    <span class="card-star ${isStarred?'on':'off'}" id="card-star-btn" onclick="toggleStar('${item.id}')">★</span>
+    ${imgBlock}
+    <div class="card-body">
+      <div class="card-title">#${item.n} — ${item.name}</div>
+      <div class="card-blurb">${item.blurb}</div>
+      <div class="vote-row">
+        <button class="vbtn like ${v==='like'?'active':''}" id="vbtn-like" onclick="doVote('like')" ${v?'disabled':''}>♥ Like</button>
+        <button class="vbtn dislike ${v==='dislike'?'active':''}" id="vbtn-dislike" onclick="doVote('dislike')" ${v?'disabled':''}>✕ Pass</button>
+        ${allStarred?`<button class="vbtn finish-btn" onclick="showFinished()">✓ Finish</button>`:''}
+      </div>
+      <div class="voted-msg" id="voted-msg">${v?(v==='like'?'✓ Liked':'✓ Passed'):''}</div>
+    </div>
+  </div>`;
+
+  const old=vp.querySelector('.slide-card');
+  if(old){
+    old.style.animation=`${direction>=0?'sOut':'sOutR'} .2s ease forwards`;
+    setTimeout(()=>{vp.innerHTML=html;attachDots();updateArrows()},200);
+  }else{vp.innerHTML=html;attachDots();updateArrows()}
+  setTimeout(()=>{const c=document.getElementById('slide-card');if(c)c.style.animation=`${direction>=0?'sIn':'sInL'} .3s cubic-bezier(.16,1,.3,1)`;},10);
+}
+
+function attachDots(){
+  const list=CATS[curCat];
+  const vp=document.getElementById('viewport');
+  const dw=document.createElement('div');
+  dw.className='dot-track';
+  const step=list.length>15?Math.ceil(list.length/15):1;
+  for(let i=0;i<list.length;i+=step){
+    const dot=document.createElement('div');
+    dot.className='dot'+(i<=curIdx&&curIdx<i+step?' active':'');
+    const idx=i;dot.onclick=()=>goTo(idx);
+    dw.appendChild(dot);
+  }
+  const ctr=document.createElement('div');
+  ctr.className='counter';ctr.textContent=`${curIdx+1} / ${list.length}`;
+  dw.appendChild(ctr);
+  vp.appendChild(dw);
+}
+
+function updateArrows(){
+  const list=CATS[curCat];
+  document.getElementById('btn-prev').className='arrow left'+(curIdx===0?' dim':'');
+  document.getElementById('btn-next').className='arrow right'+(curIdx===list.length-1?' dim':'');
+}
+
+// ═══════════════════════════════════════════
+//  NAVIGATE
+// ═══════════════════════════════════════════
+function navigate(d){
+  const list=CATS[curCat];
+  const next=curIdx+d;
+  if(next<0||next>=list.length)return;
+  dir=d;curIdx=next;renderSlide(curIdx,d);
+}
+function goTo(idx){dir=idx>=curIdx?1:-1;curIdx=idx;renderSlide(curIdx,dir);}
+document.addEventListener('keydown',e=>{
+  if(document.getElementById('modal').classList.contains('open'))return;
+  if(e.key==='ArrowRight')navigate(1);
+  if(e.key==='ArrowLeft')navigate(-1);
+});
+
+// ═══════════════════════════════════════════
+//  CATEGORY SWITCH
+// ═══════════════════════════════════════════
+function switchCat(cat,btn){
+  curCat=cat;curIdx=0;dir=1;
+  document.querySelectorAll('.ctab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  // Widen viewport for trucks
+  const vp=document.getElementById('viewport');
+  if(cat==='trucks')vp.classList.add('truck-wide');
+  else vp.classList.remove('truck-wide');
+  updateBanner();renderSlide(0,1);
+}
+
+// ═══════════════════════════════════════════
+//  STAR
+// ═══════════════════════════════════════════
+function toggleStar(itemId,fromModal){
+  const id=itemId||CATS[curCat][curIdx].id;
+  const prev=starred[curCat];
+  const isSelf=prev===id;
+  if(isSelf){
+    starred[curCat]=null;
+    sendStar(CAT_DB[curCat],id,'clear');
+    updateBanner();toast('★ Favourite removed',true);
+  }else{
+    starred[curCat]=id;
+    sendStar(CAT_DB[curCat],id,'set');
+    updateBanner();toast('★ Starred as favourite!',true);
+    document.getElementById('ctab-'+curCat).classList.add('has-star');
+  }
+  renderSlide(curIdx,0);
+  if(fromModal)syncModalStar();
+}
+
+function syncModalStar(){
+  const id=CATS[curCat][curIdx].id;
+  const on=starred[curCat]===id;
+  const ms=document.getElementById('m-star');
+  const lbl=document.getElementById('m-star-lbl');
+  ms.className='m-star '+(on?'on':'off');
+  lbl.textContent=on?'★ Your favourite':'Tap to star';
+  document.getElementById('mbox').className='mbox'+(on?' starred':'');
+}
+
+function updateBanner(){
+  const id=starred[curCat];
+  const info=document.getElementById('s-info');
+  const req=document.getElementById('s-req');
+  if(id){
+    const item=CATS[curCat].find(i=>i.id===id);
+    info.textContent='★ Favourite: '+(item?item.name:id);
+    info.className='s-info on';
+    req.textContent='✓ Selection saved';
+    req.className='s-req done';
+  }else{
+    info.textContent='No favourite selected';
+    info.className='s-info';
+    const l={logos:'logo',regal:'corporate design',trucks:'truck design'};
+    req.textContent='★ MANDATORY — pick your favourite '+l[curCat];
+    req.className='s-req';
+  }
+}
+
+async function sendStar(catKey,id,action){
+  try{await fetch('/star',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({category:catKey,logo:id,action})});}catch(e){}
+}
+
+// ═══════════════════════════════════════════
+//  VOTE
+// ═══════════════════════════════════════════
+function doVote(resp){
+  const item=CATS[curCat][curIdx];
+  if(voted[item.id])return;
+  voted[item.id]=resp;
+  sendVote(item.id,CAT_DB[curCat],resp);
+  document.getElementById('vbtn-like').disabled=true;
+  document.getElementById('vbtn-dislike').disabled=true;
+  if(resp==='like')document.getElementById('vbtn-like').classList.add('active');
+  if(resp==='dislike')document.getElementById('vbtn-dislike').classList.add('active');
+  document.getElementById('voted-msg').textContent=resp==='like'?'✓ Liked':'✓ Passed';
+  toast(resp==='like'?'♥ Liked':'✕ Passed');
+  setTimeout(()=>{if(curIdx<CATS[curCat].length-1)navigate(1);},450);
+}
+async function sendVote(id,catKey,resp){
+  try{await fetch('/vote',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({logo:id,category:catKey,response:resp})});}catch(e){}
+}
+
+// ═══════════════════════════════════════════
+//  MODAL
+// ═══════════════════════════════════════════
+function openModal(){
+  const item=CATS[curCat][curIdx];
+  const mimg=document.getElementById('mimg');
+  if(item.css){
+    document.getElementById('m-img').style.display='none';
+    const existing=mimg.querySelector('.css-render');
+    if(existing)existing.remove();
+    const cr=document.createElement('div');
+    cr.className='css-render';
+    cr.style.cssText=`width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:${item.cbg}`;
+    cr.innerHTML=item.render;
+    mimg.appendChild(cr);
+  }else{
+    document.getElementById('m-img').style.display='';
+    const cr=mimg.querySelector('.css-render');if(cr)cr.remove();
+    document.getElementById('m-img').src=item.src;
+  }
+  mimg.style.background=item.css?item.cbg:(BG[item.bg]||'#0d0d0d');
+  mimg.className='mimg'+(item.fb?' fb':'');
+  document.getElementById('m-title').textContent='#'+item.n+' — '+item.name;
+  document.getElementById('m-blurb').textContent=item.blurb;
+  const v=voted[item.id];
+  document.getElementById('m-like').disabled=!!v;
+  document.getElementById('m-dislike').disabled=!!v;
+  document.getElementById('m-voted').textContent=v?(v==='like'?'✓ Liked':'✓ Passed'):'';
+  syncModalStar();
+  document.getElementById('modal').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeM(){document.getElementById('modal').classList.remove('open');document.body.style.overflow='';}
+function bgClose(e){if(e.target.id==='modal')closeM();}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeM();});
+function modalVote(resp){
+  const item=CATS[curCat][curIdx];
+  if(voted[item.id])return;
+  voted[item.id]=resp;
+  sendVote(item.id,CAT_DB[curCat],resp);
+  document.getElementById('m-like').disabled=true;
+  document.getElementById('m-dislike').disabled=true;
+  document.getElementById('m-voted').textContent=resp==='like'?'✓ Liked — saved':'✓ Passed — saved';
+  if(document.getElementById('vbtn-like')){
+    document.getElementById('vbtn-like').disabled=true;
+    document.getElementById('vbtn-dislike').disabled=true;
+    if(resp==='like')document.getElementById('vbtn-like').classList.add('active');
+    if(resp==='dislike')document.getElementById('vbtn-dislike').classList.add('active');
+    document.getElementById('voted-msg').textContent=resp==='like'?'✓ Liked':'✓ Passed';
+  }
+  toast(resp==='like'?'♥ Liked':'✕ Passed');
+}
+
+// ═══════════════════════════════════════════
+//  TIMED POPUPS
+// ═══════════════════════════════════════════
+function closeTip(id){document.getElementById(id).classList.remove('open');document.body.style.overflow='';}
+setTimeout(()=>{if(!document.getElementById('modal').classList.contains('open'))document.getElementById('tip0').classList.add('open');},11000);
+setTimeout(()=>{if(!document.getElementById('modal').classList.contains('open'))document.getElementById('tip1').classList.add('open');},22000);
+const RS=Date.now(),SM=15*60*1000;
+setTimeout(()=>{
+  if(!document.getElementById('modal').classList.contains('open')&&!(starred.logos&&starred.regal&&starred.trucks))document.getElementById('tip2').classList.add('open');
+  const w=document.getElementById('tbar'),f=document.getElementById('tbar-fill');
+  w.style.display='block';
+  const el=Date.now()-RS,p=Math.min(100,(el/SM)*100);
+  f.style.transition='none';f.style.width=p+'%';
+  setTimeout(()=>{f.style.transition=`width ${SM-el}ms linear`;f.style.width='100%';},100);
+},49000);
+
+// ═══════════════════════════════════════════
+//  FINISHED
+// ═══════════════════════════════════════════
+function showFinished(){
+  window.location.href='/results';
+}
+
+// ═══════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════
+const toastEl=document.getElementById('toast');let tt;
+function toast(msg,isStar){
+  clearTimeout(tt);toastEl.textContent=msg;
+  toastEl.className='show'+(isStar?' st':'');
+  tt=setTimeout(()=>toastEl.className='',1800);
+}
+
+// ═══════════════════════════════════════════
+//  NAV MUSIC PLAYER — starts on M1 Track 4
+// ═══════════════════════════════════════════
+const TRACKS=[
+  {src:'/static/m1_track1.mp3',name:'M1 Track 1'},
+  {src:'/static/m1_track2.mp3',name:'M1 Track 2'},
+  {src:'/static/m1_track3.mp3',name:'M1 Track 3'},
+  {src:'/static/m1_track4.mp3',name:'M1 Track 4'},
+  {src:'/static/m1_track5.mp3',name:'M1 Track 5'},
+  {src:'/static/startup.mp3',  name:'Start Up'},
+];
+let curTrk=3,isPlaying=false,isMuted=false; // index 3 = M1 Track 4
+const audioEl=document.getElementById('audio-el');
+audioEl.volume=0.55; // slightly reduced volume
+
+function navLoadTrack(idx,autoplay){
+  curTrk=idx;
+  const t=TRACKS[idx];
+  audioEl.src=t.src;
+  document.getElementById('nav-song-name').textContent=t.name;
+  document.getElementById('nav-song-sub').textContent=`Track ${idx+1} of ${TRACKS.length}`;
+  document.getElementById('nav-progress-fill').style.width='0%';
+  if(autoplay){
+    audioEl.play().then(()=>navSetPlay(true)).catch(()=>navSetPlay(false));
+  }
+}
+function navSetPlay(p){
+  isPlaying=p;
+  document.getElementById('nav-pp').textContent=p?'⏸':'▶';
+  document.getElementById('nav-vinyl').classList.toggle('spin',p);
+}
+function navTogglePlay(){
+  if(isPlaying){audioEl.pause();navSetPlay(false);}
+  else{audioEl.play().then(()=>navSetPlay(true)).catch(e=>console.warn(e));}
+}
+function navPrev(){navLoadTrack((curTrk-1+TRACKS.length)%TRACKS.length,isPlaying)}
+function navNext(){navLoadTrack((curTrk+1)%TRACKS.length,isPlaying)}
+function navToggleMute(){
+  isMuted=!isMuted;audioEl.muted=isMuted;
+  document.getElementById('nav-mute').textContent=isMuted?'🔇':'🔊';
+  document.getElementById('nav-mute').classList.toggle('muted',isMuted);
+}
+function navSeek(e){
+  const r=document.getElementById('nav-progress-wrap').getBoundingClientRect();
+  if(audioEl.duration)audioEl.currentTime=((e.clientX-r.left)/r.width)*audioEl.duration;
+}
+audioEl.addEventListener('timeupdate',()=>{
+  if(audioEl.duration)document.getElementById('nav-progress-fill').style.width=(audioEl.currentTime/audioEl.duration*100)+'%';
+});
+audioEl.addEventListener('ended',()=>navNext());
+
+// Auto-start track 4 on load
+window.addEventListener('load',()=>{
+  navLoadTrack(3,false);
+  setTimeout(()=>{
+    audioEl.play().then(()=>navSetPlay(true)).catch(()=>navSetPlay(false));
+  },600);
+});
+
+// ═══════════════════════════════════════════
+//  BOOT
+// ═══════════════════════════════════════════
+buildStars();
+buildCityscape();
+buildTrucks();
+checkNightMode();
+renderSlide(0,1);
+updateBanner();
+</script>
+</body>
+</html>

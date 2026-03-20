@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MI Logistics – Results & Feedback</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Barlow:wght@300;400;500&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{--steel:#8fa3b1;--dark:#0d0d0d;--light:#f2f0eb;--card:#141414;--border:rgba(143,163,177,.18);--like:#5c9e72;--dislike:#9e5c5c;--star:#f5c518}
+html{scroll-behavior:smooth}
+body{background:var(--dark);color:var(--light);font-family:'Barlow',sans-serif;min-height:100vh}
+
+/* ══ MUSIC PLAYER ══ */
+#player{
+  position:fixed;top:14px;right:20px;z-index:500;
+  background:rgba(10,12,16,.95);
+  border:1px solid rgba(143,163,177,.25);
+  border-radius:4px;
+  backdrop-filter:blur(16px);
+  width:260px;
+  box-shadow:0 8px 32px rgba(0,0,0,.7);
+  overflow:hidden;
+}
+#player-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:9px 12px;
+  background:rgba(143,163,177,.08);
+  border-bottom:1px solid rgba(143,163,177,.12);
+  cursor:pointer;
+}
+#player-header .pl-title{font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--steel)}
+#player-header .pl-brand{font-size:.68rem;font-weight:500;color:var(--like)}
+.pl-toggle{font-size:12px;color:var(--steel);background:none;border:none;cursor:pointer;padding:0 2px}
+#player-body{padding:10px 12px 12px}
+/* Vinyl disc animation */
+.vinyl-wrap{display:flex;justify-content:center;margin-bottom:8px}
+.vinyl{
+  width:52px;height:52px;border-radius:50%;
+  background:conic-gradient(#1a1a1a 0deg,#252525 30deg,#1a1a1a 60deg,#252525 90deg,#1a1a1a 120deg,#252525 150deg,#1a1a1a 180deg,#252525 210deg,#1a1a1a 240deg,#252525 270deg,#1a1a1a 300deg,#252525 330deg,#1a1a1a 360deg);
+  position:relative;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 2px 12px rgba(0,0,0,.6);
+  transition:animation .3s;
+}
+.vinyl.spinning{animation:vinylSpin 2s linear infinite}
+@keyframes vinylSpin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+.vinyl::after{content:'';position:absolute;width:14px;height:14px;border-radius:50%;background:radial-gradient(circle,#5c9e72,#3a7050);box-shadow:0 0 6px rgba(92,158,114,.4)}
+/* Echo ripple on vinyl */
+@keyframes echoRipple{0%{transform:scale(1);opacity:.6}100%{transform:scale(1.8);opacity:0}}
+.echo-ring{position:absolute;width:52px;height:52px;border-radius:50%;border:1px solid rgba(92,158,114,.5);animation:echoRipple 1.4s ease-out infinite;display:none}
+.vinyl.spinning ~ .echo-ring{display:block}
+.echo-ring:nth-child(2){animation-delay:.7s}
+
+.song-info{text-align:center;margin-bottom:8px}
+.song-name{font-size:.72rem;color:var(--light);letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.song-num{font-size:.58rem;color:rgba(143,163,177,.4);letter-spacing:.12em;margin-top:2px}
+
+/* Progress bar */
+.pl-progress-wrap{height:3px;background:rgba(143,163,177,.1);border-radius:2px;margin-bottom:10px;cursor:pointer;position:relative}
+.pl-progress{height:100%;background:var(--like);border-radius:2px;width:0%;transition:width .5s linear}
+
+.pl-controls{display:flex;align-items:center;justify-content:center;gap:10px}
+.pl-btn{background:none;border:none;cursor:pointer;color:var(--steel);font-size:16px;padding:4px;border-radius:50%;transition:color .2s,background .2s;display:flex;align-items:center;justify-content:center;width:28px;height:28px}
+.pl-btn:hover{background:rgba(143,163,177,.1);color:var(--light)}
+.pl-btn.active{color:var(--like)}
+.pl-btn.muted{color:var(--dislike)}
+.pl-playpause{width:36px;height:36px;border-radius:50%;background:rgba(92,158,114,.15);border:1px solid rgba(92,158,114,.3);font-size:14px}
+.pl-playpause:hover{background:rgba(92,158,114,.3)}
+
+/* Playlist dropdown */
+.pl-list{display:none;border-top:1px solid rgba(143,163,177,.1);margin-top:8px;padding-top:8px}
+.pl-list.open{display:block}
+.pl-track{padding:5px 4px;font-size:.66rem;color:rgba(143,163,177,.6);cursor:pointer;border-radius:2px;transition:background .15s,color .15s;display:flex;align-items:center;gap:6px;letter-spacing:.04em}
+.pl-track:hover{background:rgba(143,163,177,.08);color:var(--light)}
+.pl-track.playing{color:var(--like)}
+.pl-track .tnum{min-width:14px;font-size:.58rem;opacity:.5}
+
+/* ── INLINE NAV PLAYER ── */
+#nav-player{display:flex;align-items:center;gap:8px;background:rgba(20,24,30,.85);border:1px solid rgba(143,163,177,.18);border-radius:20px;padding:5px 12px 5px 8px;flex-shrink:0;max-width:340px}
+#nav-vinyl{width:28px;height:28px;border-radius:50%;flex-shrink:0;background:conic-gradient(#1a1a1a 0deg,#252525 30deg,#1a1a1a 60deg,#252525 90deg,#1a1a1a 120deg,#252525 150deg,#1a1a1a 180deg,#252525 210deg,#1a1a1a 240deg,#252525 270deg,#1a1a1a 300deg,#252525 330deg);position:relative;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 6px rgba(0,0,0,.5)}
+#nav-vinyl::after{content:'';position:absolute;width:8px;height:8px;border-radius:50%;background:radial-gradient(circle,#5c9e72,#3a7050)}
+#nav-vinyl.spin{animation:vSpin 1.8s linear infinite}
+@keyframes vSpin{to{transform:rotate(360deg)}}
+.nav-song-info{display:flex;flex-direction:column;min-width:0}
+#nav-song-name{font-size:.6rem;color:var(--light);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:110px;letter-spacing:.04em}
+#nav-song-sub{font-size:.52rem;color:rgba(143,163,177,.45);letter-spacing:.1em}
+.nav-ctrl{background:none;border:none;cursor:pointer;color:var(--steel);font-size:13px;padding:2px 3px;transition:color .2s;line-height:1}
+.nav-ctrl:hover{color:var(--light)}
+.nav-ctrl.pp{font-size:15px;color:var(--like)}
+.nav-ctrl.muted{color:var(--dislike)}
+#nav-progress-wrap{width:70px;height:3px;background:rgba(143,163,177,.12);border-radius:2px;cursor:pointer;flex-shrink:0}
+#nav-progress-fill{height:100%;width:0%;background:var(--like);border-radius:2px;transition:width .5s linear}
+
+nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;gap:14px;padding:8px 20px;background:rgba(13,13,13,.95);backdrop-filter:blur(14px);border-bottom:1px solid var(--border)}
+nav img{height:30px;flex-shrink:0}
+.nav-links{display:flex;gap:18px;margin-left:auto}
+.nav-links a{color:var(--steel);font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;text-decoration:none;transition:color .2s}
+.nav-links a:hover{color:var(--light)}
+.hero{text-align:center;padding:44px 20px 32px}
+.hero h1{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(1.8rem,4vw,3rem);letter-spacing:.06em;margin-bottom:8px}
+.hero p{color:var(--steel);font-size:.82rem;letter-spacing:.04em}
+.content{max-width:960px;margin:0 auto;padding:0 24px 80px;display:flex;flex-direction:column;gap:28px}
+.ctrl-row{display:flex;gap:10px;flex-wrap:wrap}
+.ctrl-btn{padding:8px 24px;border:1px solid var(--border);background:transparent;color:var(--steel);cursor:pointer;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;border-radius:2px;transition:all .2s}
+.ctrl-btn:hover{background:var(--steel);color:var(--dark)}
+.ctrl-btn.danger{border-color:rgba(158,92,92,.4);color:var(--dislike)}
+.ctrl-btn.danger:hover{background:var(--dislike);color:#fff;border-color:var(--dislike)}
+
+/* ══ TRUCK MERGE ══ */
+.vehicle-panel{background:rgba(245,197,24,.04);border:1px solid rgba(245,197,24,.2);border-radius:3px;padding:26px 28px}
+.vehicle-panel h2{font-family:'Cormorant Garamond',serif;font-size:1.35rem;font-weight:300;letter-spacing:.08em;color:var(--star);margin-bottom:6px}
+.vehicle-panel .sub{font-size:.74rem;color:var(--steel);margin-bottom:20px;letter-spacing:.03em}
+
+
+/* ── FAVOURITES DISPLAY — truck + logo side by side ── */
+.favs-display{
+  display:flex;gap:16px;align-items:stretch;margin-bottom:16px;
+  flex-wrap:wrap;
+}
+/* Truck panel — full selected truck image, no red base */
+.fav-truck-panel{
+  flex:2;min-width:280px;
+  background:#111;border-radius:4px;overflow:hidden;
+  border:1px solid rgba(143,163,177,.15);
+  box-shadow:0 8px 32px rgba(0,0,0,.7);
+  position:relative;min-height:180px;
+  display:flex;align-items:center;justify-content:center;
+}
+#fav-truck-img{
+  width:100%;height:100%;object-fit:contain;
+  display:none;
+  animation:fadeInFav 1.2s ease forwards;
+}
+@keyframes fadeInFav{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
+.fav-truck-empty{
+  font-size:.76rem;color:rgba(143,163,177,.3);
+  letter-spacing:.1em;text-align:center;padding:20px;
+}
+
+/* Logo panel */
+.fav-logo-panel{
+  flex:1;min-width:160px;
+  background:#0c0f14;border-radius:4px;
+  border:1px solid rgba(143,163,177,.15);
+  box-shadow:0 8px 32px rgba(0,0,0,.7);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:10px;padding:20px 16px;
+  position:relative;
+}
+.fav-logo-label{
+  font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;
+  color:rgba(245,197,24,.5);
+}
+#fav-logo-img{max-width:80%;max-height:120px;object-fit:contain;display:none;animation:fadeInFav 1.2s ease .3s forwards;opacity:0}
+.fav-logo-name{font-family:'Cormorant Garamond',serif;font-size:.82rem;color:rgba(242,240,235,.7);text-align:center;letter-spacing:.03em}
+.fav-empty-logo{font-size:.72rem;color:rgba(143,163,177,.3);letter-spacing:.08em;text-align:center}
+
+.no-selection-msg{
+  font-size:.78rem;color:rgba(143,163,177,.35);letter-spacing:.1em;text-align:center;padding:20px;
+}
+
+.vehicle-labels{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:4px}
+.v-label{background:rgba(245,197,24,.04);border:1px solid rgba(245,197,24,.1);border-radius:2px;padding:10px 14px}
+.v-label .cat{font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(245,197,24,.5);margin-bottom:4px}
+.v-label .name{font-family:'Cormorant Garamond',serif;font-size:1rem;color:var(--light)}
+.v-label .empty{font-size:.74rem;color:rgba(143,163,177,.3);font-style:italic}
+
+/* RESULTS */
+.results-section h2{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:300;letter-spacing:.08em;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+.cat-block{margin-bottom:24px}
+.cat-block h3{font-size:.68rem;letter-spacing:.24em;text-transform:uppercase;color:var(--steel);margin-bottom:12px}
+.result-row{background:var(--card);border:1px solid var(--border);padding:12px 18px;border-radius:2px;margin-bottom:7px}
+.result-row .rname{font-size:.78rem;color:var(--light);margin-bottom:7px}
+.bars{display:flex;flex-direction:column;gap:6px}
+.bar-row{display:flex;align-items:center;gap:9px}
+.bar-lbl{width:54px;font-size:.6rem;letter-spacing:.13em;text-transform:uppercase}
+.bar-lbl.l{color:var(--like)}.bar-lbl.d{color:var(--dislike)}
+.bar-track{flex:1;height:4px;background:rgba(255,255,255,.05);border-radius:3px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px;transition:width .8s cubic-bezier(.16,1,.3,1)}
+.bar-fill.l{background:var(--like)}.bar-fill.d{background:var(--dislike)}
+.bar-count{width:22px;text-align:right;font-size:.7rem;color:var(--steel)}
+
+/* ANALYSIS */
+.analysis-section{background:rgba(143,163,177,.04);border:1px solid var(--border);border-radius:3px;padding:26px 28px}
+.analysis-section h2{font-family:'Cormorant Garamond',serif;font-size:1.35rem;font-weight:300;letter-spacing:.08em;margin-bottom:6px}
+.analysis-section .sub{font-size:.74rem;color:var(--steel);margin-bottom:20px;letter-spacing:.03em}
+.analysis-content{font-size:.78rem;color:rgba(242,240,235,.7);line-height:1.85;letter-spacing:.02em}
+.analysis-content p{margin-bottom:10px}
+.analysis-content strong{color:var(--light)}
+.insight-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-top:18px}
+.insight-card{background:rgba(0,0,0,.3);border:1px solid rgba(143,163,177,.1);border-radius:2px;padding:14px 16px}
+.insight-card .ico{font-size:1.3rem;margin-bottom:7px}
+.insight-card .it{font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--steel);margin-bottom:5px}
+.insight-card .ix{font-size:.72rem;color:rgba(242,240,235,.55);line-height:1.6}
+
+/* FEEDBACK */
+.feedback-section{background:rgba(92,158,114,.04);border:1px solid rgba(92,158,114,.18);border-radius:3px;padding:26px 28px}
+.feedback-section h2{font-family:'Cormorant Garamond',serif;font-size:1.35rem;font-weight:300;letter-spacing:.08em;color:var(--like);margin-bottom:6px}
+.feedback-section .sub{font-size:.74rem;color:var(--steel);margin-bottom:20px}
+.fb-group{margin-bottom:16px}
+.fb-group label{display:block;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:var(--steel);margin-bottom:6px}
+.fb-input,.fb-textarea{width:100%;background:rgba(0,0,0,.4);border:1px solid var(--border);color:var(--light);font-family:'Barlow',sans-serif;font-size:.78rem;padding:11px 14px;border-radius:2px;outline:none;transition:border-color .2s;letter-spacing:.02em}
+.fb-input:focus,.fb-textarea:focus{border-color:rgba(92,158,114,.5)}
+.fb-textarea{min-height:100px;resize:vertical;line-height:1.65}
+.star-rating{display:flex;gap:6px;margin-top:4px}
+.star-rating .sr{font-size:1.8rem;cursor:pointer;color:rgba(245,197,24,.2);transition:color .15s,transform .15s;user-select:none}
+.star-rating .sr:hover,.star-rating .sr.on{color:var(--star);transform:scale(1.15)}
+.contact-box{background:rgba(143,163,177,.04);border:1px solid var(--border);border-radius:2px;padding:18px 22px;margin-top:16px;font-size:.8rem;color:var(--steel);line-height:1.85;letter-spacing:.03em}
+.contact-box strong{color:var(--light)}
+.contact-box a{color:var(--star);text-decoration:none}
+.contact-box a:hover{text-decoration:underline}
+.fb-submit{display:inline-block;padding:11px 38px;background:transparent;border:1px solid rgba(92,158,114,.5);color:var(--like);font-family:'Barlow',sans-serif;font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:background .25s,color .25s}
+.fb-submit:hover{background:var(--like);color:#fff}
+.fb-thanks{display:none;font-size:.76rem;color:var(--like);letter-spacing:.08em;padding:8px 0}
+</style>
+</head>
+<body>
+
+<!-- ══ MUSIC PLAYER ══ -->
+<audio id="audio-el" preload="auto"></audio>
+
+<nav>
+  <img src="/static/logo.png" alt="MI Logistics">
+  <div id="nav-player">
+    <div id="nav-vinyl"></div>
+    <div class="nav-song-info">
+      <div id="nav-song-name">M1 Track 4</div>
+      <div id="nav-song-sub">M1 Logistics Playlist</div>
+    </div>
+    <button class="nav-ctrl" onclick="navPrev()" title="Prev">⏮</button>
+    <button class="nav-ctrl pp" id="nav-pp" onclick="navTogglePlay()" title="Play/Pause">▶</button>
+    <button class="nav-ctrl" onclick="navNext()" title="Next">⏭</button>
+    <button class="nav-ctrl" id="nav-mute" onclick="navToggleMute()" title="Mute">🔊</button>
+    <div id="nav-progress-wrap" onclick="navSeek(event)">
+      <div id="nav-progress-fill"></div>
+    </div>
+  </div>
+  <div class="nav-links"><a href="/all-logos">← Back to Review</a></div>
+</nav>
+
+<div class="hero">
+  <h1>Results &amp; Feedback</h1>
+  <p>Your favourites, vote summary, and design recommendations.</p>
+</div>
+
+<div class="content">
+  <div class="ctrl-row">
+    <button class="ctrl-btn" onclick="load()">↺ Refresh</button>
+    <button class="ctrl-btn danger" onclick="resetData()">✕ Reset All</button>
+  </div>
+
+  <!-- FAVOURITES DISPLAY -->
+  <div class="vehicle-panel">
+    <h2>⭐ Your Starred Favourites — Displayed</h2>
+    <div class="sub">Your starred Truck Display and Logo selections shown side by side.</div>
+    <div class="favs-display">
+      <!-- TRUCK DISPLAY -->
+      <div class="fav-truck-panel">
+        <img id="fav-truck-img" src="" alt="Starred Truck Display">
+        <div class="fav-truck-empty" id="fav-truck-empty">⭐ Star a Truck Display to see it here</div>
+      </div>
+      <!-- LOGO -->
+      <div class="fav-logo-panel">
+        <div class="fav-logo-label">★ Starred Logo</div>
+        <img id="fav-logo-img" src="" alt="Starred Logo">
+        <div class="fav-logo-name" id="fav-logo-name"></div>
+        <div class="fav-empty-logo" id="fav-logo-empty">Star a Logo to see it here</div>
+      </div>
+    </div>
+    <div class="vehicle-labels" id="star-picks">
+      <div class="v-label"><div class="cat">Logo Ideas</div><div class="empty">Not selected</div></div>
+      <div class="v-label"><div class="cat">Corporate &amp; Regal</div><div class="empty">Not selected</div></div>
+      <div class="v-label"><div class="cat">Truck Display</div><div class="empty">Not selected</div></div>
+    </div>
+  </div>
+
+  <!-- VOTE RESULTS -->
+  <div class="results-section"><h2>Vote Summary</h2><div id="results-body"><p style="color:rgba(143,163,177,.4);font-size:.8rem">Loading...</p></div></div>
+
+  <!-- ANALYSIS -->
+  <div class="analysis-section">
+    <h2>Design Analysis</h2>
+    <div class="sub">Professional observations based on industry research.</div>
+    <div class="analysis-content">
+      <p><strong>Brand consistency</strong> is the single biggest driver of logistics brand equity. Research by Nielsen shows brands that maintain consistent visual identity across fleet, digital and print touchpoints achieve <strong>23% higher recognition</strong> in target markets.</p>
+      <p><strong>Fleet livery</strong> is your most powerful advertising channel — a single HGV generates an estimated <strong>40,000–60,000 impressions per day</strong> on motorway routes. The design you choose will represent MI Logistics on every mile driven.</p>
+      <p><strong>Colour psychology in logistics:</strong> Dark backgrounds project authority and premium positioning. Green signals environmental responsibility. Silver and chrome communicate precision and reliability.</p>
+    </div>
+    <div class="insight-grid">
+      <div class="insight-card"><div class="ico">🚛</div><div class="it">Fleet Impact</div><div class="ix">HGV livery generates up to 60,000 impressions daily — more than most digital campaigns.</div></div>
+      <div class="insight-card"><div class="ico">🎨</div><div class="it">Colour Flexibility</div><div class="ix">All colours and contrast shown are fully adjustable to match your exact preference.</div></div>
+      <div class="insight-card"><div class="ico">📐</div><div class="it">Scalability</div><div class="ix">The chosen logo will be adapted for vehicles, uniforms, stationery, digital and social.</div></div>
+      <div class="insight-card"><div class="ico">⭐</div><div class="it">Your Star Picks</div><div class="ix">Your three starred favourites form the shortlist for the next stage of development.</div></div>
+    </div>
+  </div>
+
+  <!-- FEEDBACK -->
+  <div class="feedback-section">
+    <h2>Your Feedback</h2>
+    <div class="sub">Your thoughts help shape the final design direction.</div>
+    <div class="fb-group">
+      <label>Did you like the M1 Logistics Playlist? Rate your experience</label>
+      <div class="star-rating" id="playlist-stars">
+        <span class="sr" onclick="setRating(1)">★</span>
+        <span class="sr" onclick="setRating(2)">★</span>
+        <span class="sr" onclick="setRating(3)">★</span>
+        <span class="sr" onclick="setRating(4)">★</span>
+        <span class="sr" onclick="setRating(5)">★</span>
+      </div>
+    </div>
+    <div class="fb-group" style="margin-top:18px">
+      <label>Colour or Design Changes You'd Like</label>
+      <input class="fb-input" id="fb-colours" type="text" placeholder="e.g. Would prefer darker green, or gold instead of silver">
+    </div>
+    <div class="fb-group" style="margin-top:14px">
+      <label>Further Requests or Comments</label>
+      <textarea class="fb-textarea" id="fb-requests" placeholder="Any other thoughts — what stood out, specific requests for the next round..."></textarea>
+    </div>
+    <div style="margin-top:16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+      <button class="fb-submit" onclick="submitFeedback()">Submit Feedback</button>
+      <div class="fb-thanks" id="fb-thanks">✓ Feedback saved — thank you!</div>
+    </div>
+    <div class="contact-box">
+      <strong>Should there be any further requests or messages — please contact me any time.</strong><br><br>
+      📞 <a href="tel:07735326227"><strong>07735 326227</strong></a><br>
+      ✉️ <a href="mailto:jahson2023@gmail.com"><strong>jahson2023@gmail.com</strong></a><br><br>
+      <span style="color:rgba(143,163,177,.4);font-size:.74rem">I'm here to make sure the final brand is exactly right for MI Logistics.</span>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══ NAV MUSIC PLAYER ══
+const TRACKS=[
+  {src:'/static/m1_track1.mp3',name:'M1 Track 1'},
+  {src:'/static/m1_track2.mp3',name:'M1 Track 2'},
+  {src:'/static/m1_track3.mp3',name:'M1 Track 3'},
+  {src:'/static/m1_track4.mp3',name:'M1 Track 4'},
+  {src:'/static/m1_track5.mp3',name:'M1 Track 5'},
+  {src:'/static/startup.mp3',  name:'Start Up'},
+];
+let curTrk=3,isPlaying=false,isMuted=false;
+const audioEl=document.getElementById('audio-el');
+audioEl.volume=0.55;
+
+function navLoadTrack(idx,autoplay){
+  curTrk=idx;const t=TRACKS[idx];
+  audioEl.src=t.src;
+  document.getElementById('nav-song-name').textContent=t.name;
+  document.getElementById('nav-song-sub').textContent=`Track ${idx+1} of ${TRACKS.length}`;
+  document.getElementById('nav-progress-fill').style.width='0%';
+  if(autoplay)audioEl.play().then(()=>navSetPlay(true)).catch(()=>navSetPlay(false));
+}
+function navSetPlay(p){isPlaying=p;document.getElementById('nav-pp').textContent=p?'⏸':'▶';document.getElementById('nav-vinyl').classList.toggle('spin',p)}
+function navTogglePlay(){if(isPlaying){audioEl.pause();navSetPlay(false);}else{audioEl.play().then(()=>navSetPlay(true)).catch(e=>console.warn(e));}}
+function navPrev(){navLoadTrack((curTrk-1+TRACKS.length)%TRACKS.length,isPlaying)}
+function navNext(){navLoadTrack((curTrk+1)%TRACKS.length,isPlaying)}
+function navToggleMute(){isMuted=!isMuted;audioEl.muted=isMuted;document.getElementById('nav-mute').textContent=isMuted?'🔇':'🔊';document.getElementById('nav-mute').classList.toggle('muted',isMuted)}
+function navSeek(e){const r=document.getElementById('nav-progress-wrap').getBoundingClientRect();if(audioEl.duration)audioEl.currentTime=((e.clientX-r.left)/r.width)*audioEl.duration}
+audioEl.addEventListener('timeupdate',()=>{if(audioEl.duration)document.getElementById('nav-progress-fill').style.width=(audioEl.currentTime/audioEl.duration*100)+'%'});
+audioEl.addEventListener('ended',()=>navNext());
+// Auto-start
+window.addEventListener('load',()=>{navLoadTrack(3,false);setTimeout(()=>{audioEl.play().then(()=>navSetPlay(true)).catch(()=>navSetPlay(false));},600);});
+
+// ══ LOGO SRC MAP ══
+const LOGO_SRCS = {
+  l01:'/static/logo_13_woven.png',l02:'/static/logo_14_circuit2.png',l03:'/static/logo_15_globe.png',
+  l04:'/static/logo_16_speed.png',l05:'/static/logo_17_3d.png',l06:'/static/logo_18_navy_gold.png',
+  l07:'/static/logo_19_navy_blue.png',l08:'/static/logo_20_teal_dark.png',l09:'/static/logo_21_purple.png',
+  l10:'/static/logo_01_chrome.png',l11:'/static/logo_09_steel.png',l12:'/static/logo_02_tech.png',
+  l13:'/static/logo_03_world.png',l14:'/static/logo_04_uj_rope.png',l15:'/static/logo_05_tile.png',
+  l16:'/static/logo_06_red.png',l17:'/static/logo_07_ornate.png',l18:'/static/logo_08_silver.png',
+  l19:'/static/logo_10_uj_small.png',l20:'/static/logo_11_uj_ornate.png',l21:'/static/logo_12_london.png',
+};
+const LOGO_NAME_MAP = {
+  'woven':'l01','circuit board teal':'l02','globe map compact':'l03','speed swoosh':'l04',
+  '3d architectural':'l05','navy & gold':'l06','royal blue speed':'l07','teal dark circuit':'l08',
+  'purple 3d':'l09','chrome red':'l10','steel arrow':'l11','tech circuit glow':'l12',
+  'world map':'l13','union jack rope':'l14','geometric tile':'l15','red curtain':'l16',
+  'ornate blue':'l17','silver 3d':'l18','union jack compact':'l19','union jack ornate':'l20',
+  'london skyline':'l21',
+};
+function findLogoSrc(name){
+  if(!name) return null;
+  const n = name.toLowerCase();
+  for(const [k,v] of Object.entries(LOGO_NAME_MAP)){
+    if(n.includes(k)) return LOGO_SRCS[v] || null;
+  }
+  return null;
+}
+
+function updateFavsDisplay(logoName, truckName){
+  // ── TRUCK ──
+  const truckImg   = document.getElementById('fav-truck-img');
+  const truckEmpty = document.getElementById('fav-truck-empty');
+  const truckSrc   = findTruckSrc(truckName);
+  if(truckSrc){
+    truckImg.src   = truckSrc;
+    truckImg.style.display = 'block';
+    truckEmpty.style.display = 'none';
+    truckImg.style.animation = 'none';
+    void truckImg.offsetWidth;
+    truckImg.style.animation = 'fadeInFav 1.2s ease forwards';
+  } else {
+    truckImg.style.display = 'none';
+    truckEmpty.style.display = 'block';
+  }
+
+  // ── LOGO ──
+  const logoImg   = document.getElementById('fav-logo-img');
+  const logoName2 = document.getElementById('fav-logo-name');
+  const logoEmpty = document.getElementById('fav-logo-empty');
+  const logoSrc   = findLogoSrc(logoName);
+  if(logoSrc){
+    logoImg.src   = logoSrc;
+    logoImg.style.display = 'block';
+    logoImg.style.opacity = '0';
+    logoImg.style.animation = 'none';
+    void logoImg.offsetWidth;
+    logoImg.style.animation = 'fadeInFav 1.2s ease 0.3s forwards';
+    logoName2.textContent   = logoName || '';
+    logoEmpty.style.display = 'none';
+  } else {
+    logoImg.style.display   = 'none';
+    logoName2.textContent   = '';
+    logoEmpty.style.display = 'block';
+  }
+}
+
+// Map truck display names (as stored in DB) directly to image src
+// Keys are the exact 'name' field from the CATS.trucks array in all_logos.html
+const TRUCK_NAME_TO_SRC = {
+  'black — centred logo':       '/static/truck_01.png',
+  'black — full width branding':'/static/truck_02.png',
+  'black — large text':         '/static/truck_03.png',
+  'green — centred world mi':   '/static/truck_04.png',
+  'navy — centred monogram':    '/static/truck_05.png',
+  'grey — modern stacking':     '/static/truck_06.png',
+  'dark — dynamic direction':   '/static/truck_07.png',
+  'silver — corporate columnar':'/static/truck_08.png',
+  'black — integrated brand':   '/static/truck_09.png',
+  'dark — dynamic alt':         '/static/truck_10.png',
+  'silver — corporate alt':     '/static/truck_11.png',
+  'green — arrow accent':       '/static/truck_12.png',
+  'green — clean text':         '/static/truck_13.png',
+  'grey — red route map':       '/static/truck_14.png',
+  'blue — woven centred':       '/static/truck_15.png',
+  'white — icon mosaic':        '/static/truck_16.png',
+  'black — gold ornate':        '/static/truck_17.png',
+  'silver — tech circuit':      '/static/truck_18.png',
+  'green — left logo block':    '/static/truck_19.png',
+  'green — centred globe badge':'/static/truck_20.png',
+};
+
+function findTruckSrc(name){
+  if(!name) return null;
+  const n = name.toLowerCase().trim();
+  // Exact match first
+  if(TRUCK_NAME_TO_SRC[n]) return TRUCK_NAME_TO_SRC[n];
+  // Fallback: partial match on any key
+  for(const [k,v] of Object.entries(TRUCK_NAME_TO_SRC)){
+    if(n.includes(k) || k.includes(n)) return v;
+  }
+  // Last resort: match T1–T20 pattern stored as ID
+  const m = name.match(/^t0?(\d+)$/i);
+  if(m){
+    const num = String(m[1]).padStart(2,'0');
+    return `/static/truck_${num}.png`;
+  }
+  return null;
+}
+
+
+// ══════════════════════════════════════════
+//  LOAD RESULTS
+// ══════════════════════════════════════════
+let playlistRating=0;
+const CAT_LABELS={'logo-ideas':'Logo Ideas','regal':'Corporate & Regal','truck-display':'Truck Display'};
+
+function setRating(n){
+  playlistRating=n;
+  document.querySelectorAll('#playlist-stars .sr').forEach((s,i)=>s.classList.toggle('on',i<n));
+}
+
+async function load(){
+  const body=document.getElementById('results-body');
+  try{
+    const data=await fetch('/api/results').then(r=>r.json());
+    const {votes,stars,feedback}=data;
+
+    // Star picks labels + truck merge
+    const picks=document.getElementById('star-picks');
+    picks.innerHTML=Object.entries(CAT_LABELS).map(([k,label])=>{
+      const name=stars&&stars[k]?stars[k]:null;
+      return `<div class="v-label"><div class="cat">${label}</div>${name?`<div class="name">★ ${name}</div>`:'<div class="empty">Not selected</div>'}</div>`;
+    }).join('');
+
+    const logoStarName  = stars&&stars['logo-ideas']   ? stars['logo-ideas']   : '';
+    const truckStarName = stars&&stars['truck-display'] ? stars['truck-display']: '';
+    updateFavsDisplay(logoStarName, truckStarName);
+
+    // Load saved feedback
+    if(feedback){
+      if(feedback.playlist_rating)setRating(feedback.playlist_rating);
+      if(feedback.colour_changes)document.getElementById('fb-colours').value=feedback.colour_changes;
+      if(feedback.further_requests)document.getElementById('fb-requests').value=feedback.further_requests;
+    }
+
+    // Votes
+    if(!votes||!Object.keys(votes).length){body.innerHTML='<p style="color:rgba(143,163,177,.4);font-size:.8rem">No votes recorded yet.</p>';return;}
+    const order=['logo-ideas','regal','truck-display'];
+    const sorted=[...order.filter(c=>votes[c]),...Object.keys(votes).filter(c=>!order.includes(c))];
+    body.innerHTML=sorted.map(cat=>{
+      const rows=votes[cat];
+      const max=Math.max(...rows.map(r=>Math.max(r.likes,r.dislikes,1)));
+      return `<div class="cat-block"><h3>${CAT_LABELS[cat]||cat}</h3>${rows.map(row=>`
+        <div class="result-row"><div class="rname">${row.logo_name}</div>
+          <div class="bars">
+            <div class="bar-row"><span class="bar-lbl l">Liked</span><div class="bar-track"><div class="bar-fill l" style="width:0%" data-w="${Math.round(row.likes/max*100)}%"></div></div><span class="bar-count">${row.likes}</span></div>
+            <div class="bar-row"><span class="bar-lbl d">Passed</span><div class="bar-track"><div class="bar-fill d" style="width:0%" data-w="${Math.round(row.dislikes/max*100)}%"></div></div><span class="bar-count">${row.dislikes}</span></div>
+          </div>
+        </div>`).join('')}</div>`;
+    }).join('');
+    setTimeout(()=>document.querySelectorAll('.bar-fill').forEach(b=>b.style.width=b.dataset.w),60);
+  }catch(e){body.innerHTML='<p style="color:rgba(158,92,92,.5);font-size:.8rem">Could not load results.</p>';}
+}
+
+
+async function resetData(){
+  if(!confirm('Reset ALL votes, stars and feedback?'))return;
+  await fetch('/api/reset',{method:'POST'});load();
+}
+
+async function submitFeedback(){
+  const colours=document.getElementById('fb-colours').value.trim();
+  const requests=document.getElementById('fb-requests').value.trim();
+  try{
+    await fetch('/feedback',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({playlist_rating:playlistRating,colour_changes:colours,further_requests:requests})});
+    document.getElementById('fb-thanks').style.display='block';
+    setTimeout(()=>document.getElementById('fb-thanks').style.display='none',3000);
+  }catch(e){alert('Error saving feedback.');}
+}
+
+load();
+</script>
+</body>
+</html>
