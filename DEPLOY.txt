@@ -1,0 +1,115 @@
+# MI Logistics Brand Review — Deployment Guide
+# Send your boss a single URL using Render.com (free, no credit card needed)
+
+=======================================================
+OPTION 1: RENDER.COM — Recommended (free, 1 URL, works on phone)
+=======================================================
+
+WHAT YOU NEED:
+• A GitHub account (free) — github.com
+• A Render account (free) — render.com
+• The mi_logos folder on your PC (already set up by the PS1 script)
+
+---
+
+STEP 1 — Install Git (if you don't have it)
+  Download from: https://git-scm.com/download/win
+  Install with all defaults.
+
+---
+
+STEP 2 — Create a GitHub repository
+  1. Go to https://github.com and sign in
+  2. Click the green "New" button (top left)
+  3. Name it: mi-logistics-review
+  4. Set to PRIVATE (important — keeps your assets hidden)
+  5. Click "Create repository"
+  6. You'll see a page with commands — leave it open
+
+---
+
+STEP 3 — Upload your app to GitHub
+  Open PowerShell and run these commands one by one:
+
+    cd "$env:USERPROFILE\mi_logos"
+    git init
+    git add .
+    git commit -m "MI Logistics Brand Review App"
+    git branch -M main
+    git remote add origin https://github.com/YOUR_USERNAME/mi-logistics-review.git
+    git push -u origin main
+
+  (Replace YOUR_USERNAME with your actual GitHub username)
+  GitHub will ask for your username + password (use a Personal Access Token
+  instead of password — generate one at github.com > Settings > Developer Settings)
+
+---
+
+STEP 4 — Deploy on Render
+  1. Go to https://render.com and sign in with GitHub
+  2. Click "New +" → "Web Service"
+  3. Connect your GitHub repo: mi-logistics-review
+  4. Render auto-detects the settings from render.yaml
+  5. Click "Create Web Service"
+  6. Wait ~3 minutes for it to build
+
+  Your URL will be: https://mi-logistics-review.onrender.com
+  (or similar — Render shows it on the dashboard)
+
+---
+
+STEP 5 — Send to your boss
+  Just text or email the URL:
+  "Here's your brand review: https://mi-logistics-review.onrender.com"
+
+  Works on:  Phone, tablet, laptop — any browser, anywhere in the world.
+  Database:  All votes, stars, and feedback are saved on Render's disk.
+
+---
+
+IMPORTANT NOTES:
+• Free Render apps "sleep" after 15 mins of inactivity — first load takes ~30s to wake up
+  Solution: Upgrade to Render's $7/month "Starter" plan to keep it always-on
+  OR just warn your boss it may take 30 seconds on first open
+
+• The SQLite database is stored on Render's disk
+  If you ever redeploy, the database resets — download results before redeploying
+
+• Audio and images are all bundled with the app — nothing external needed
+
+=======================================================
+OPTION 2: NGROK — Quick Share (your PC must stay on)
+=======================================================
+
+Use this if you just want to share it quickly without GitHub.
+
+STEP 1 — Download ngrok: https://ngrok.com/download
+STEP 2 — Run your app locally:
+    Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+    & "$env:USERPROFILE\Downloads\MI_BrandReview_Setup.ps1"
+
+STEP 3 — Open a second PowerShell window and run:
+    ngrok http 5000
+
+STEP 4 — ngrok gives you a URL like: https://abc123.ngrok.io
+    Send that URL to your boss — it works immediately.
+
+LIMITATION: The URL only works while your PC is running and ngrok is active.
+
+=======================================================
+OPTION 3: RAILWAY.APP — Alternative to Render
+=======================================================
+
+Very similar to Render but sometimes faster to set up:
+  1. Go to https://railway.app
+  2. Sign in with GitHub
+  3. "New Project" → "Deploy from GitHub repo"
+  4. Select mi-logistics-review
+  5. It auto-deploys. Free tier gives 500 hours/month.
+
+=======================================================
+WHICH SHOULD YOU USE?
+=======================================================
+
+Just for your boss to review (today/tomorrow):  → USE NGROK (Option 2, 5 mins)
+Permanent link you can share anytime:           → USE RENDER (Option 1, 20 mins)
