@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MI Logistics – Logo Review</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600;700&family=Barlow:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+  :root {
+    --steel:#8fa3b1; --dark:#0d0d0d; --light:#f2f0eb;
+    --card:#141414;  --border:rgba(143,163,177,.18);
+    --like:#5c9e72;  --dislike:#9e5c5c;
+    --gold:#c9a84c;  --navy:#1a2744;
+  }
+  html { scroll-behavior:smooth; }
+  body {
+    background:var(--dark); color:var(--light);
+    font-family:'Barlow',sans-serif; min-height:100vh;
+    overflow-y:auto;
+    overflow-x:hidden;
+  }
+
+  /* ══════════════════════════════════════════
+     TRUCK HIGHWAY — scrolling background
+  ══════════════════════════════════════════ */
+  #truck-highway {
+    position:fixed; inset:0; z-index:0;
+    overflow:hidden; pointer-events:none;
+  }
+
+  /* Road stripe */
+  .road {
+    position:absolute; bottom:0; left:0; right:0;
+    height:80px;
+    background: linear-gradient(to bottom, #1a1a1a 0%, #111 100%);
+    border-top:2px solid #333;
+  }
+  .road-line {
+    position:absolute; top:38px; left:0;
+    width:200%; height:4px;
+    background:repeating-linear-gradient(90deg,
+      transparent 0px, transparent 40px,
+      rgba(255,220,0,.25) 40px, rgba(255,220,0,.25) 80px);
+    animation: roadScroll 4s linear infinite;
+  }
+  @keyframes roadScroll {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  /* Truck SVG animations — 3 lanes at different depths */
+  .truck {
+    position:absolute;
+    bottom:8px;
+    animation: truckDrive linear infinite;
+    will-change:transform;
+  }
+  .truck.lane1 { animation-duration:18s; transform:scale(0.85); opacity:0.35; bottom:14px; }
+  .truck.lane2 { animation-duration:24s; transform:scale(0.62); opacity:0.25; bottom:20px; }
+  .truck.lane3 { animation-duration:12s; transform:scale(1.0);  opacity:0.40; bottom:10px; }
+  .truck.d1 { animation-delay:0s; }
+  .truck.d2 { animation-delay:-6s; }
+  .truck.d3 { animation-delay:-12s; }
+  .truck.d4 { animation-delay:-3s; }
+  .truck.d5 { animation-delay:-9s; }
+  .truck.d6 { animation-delay:-15s; }
+
+  @keyframes truckDrive {
+    0%   { left:-360px; }
+    100% { left:110vw; }
+  }
+
+  /* Subtle spotlight beams from trucks */
+  .truck-beam {
+    position:absolute;
+    bottom:60px;
+    width:180px; height:120px;
+    background:radial-gradient(ellipse 60% 80% at 50% 100%,
+      rgba(255,240,180,.04) 0%, transparent 100%);
+    animation: beamDrive linear infinite;
+    pointer-events:none;
+  }
+  .truck-beam.b1 { animation-duration:18s; animation-delay:0s; }
+  .truck-beam.b2 { animation-duration:24s; animation-delay:-8s; }
+  .truck-beam.b3 { animation-duration:12s; animation-delay:-4s; }
+  @keyframes beamDrive {
+    0%   { left:-200px; }
+    100% { left:110vw; }
+  }
+
+  /* NAV */
+  nav {
+    position:fixed; top:0; left:0; right:0; z-index:100;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:18px 40px;
+    background:rgba(13,13,13,.92); backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--border);
+  }
+  nav img { height:36px; filter:brightness(1.1); }
+  .nav-links { display:flex; gap:24px; align-items:center; }
+  .nav-links a {
+    color:var(--steel); font-size:.76rem; letter-spacing:.18em;
+    text-transform:uppercase; text-decoration:none; transition:color .2s;
+  }
+  .nav-links a:hover { color:var(--light); }
+
+  /* HERO */
+  .page-hero {
+    position:relative; z-index:10;
+    padding:120px 40px 40px; text-align:center;
+  }
+  .page-hero h1 {
+    font-family:'Cormorant Garamond',serif; font-weight:300;
+    font-size:clamp(2rem,5vw,3.2rem); letter-spacing:.06em; margin-bottom:12px;
+  }
+  .page-hero p {
+    color:var(--steel); font-size:.86rem; letter-spacing:.04em;
+    max-width:480px; margin:0 auto; line-height:1.75;
+  }
+
+  /* TABS */
+  .tabs {
+    position:relative; z-index:10;
+    display:flex; justify-content:center;
+    margin:36px auto 0; width:fit-content;
+    border:1px solid var(--border); border-radius:2px; overflow:hidden;
+  }
+  .tab-btn {
+    padding:12px 36px; background:transparent;
+    border:none; border-right:1px solid var(--border);
+    color:var(--steel); font-family:'Barlow',sans-serif;
+    font-size:.74rem; letter-spacing:.2em; text-transform:uppercase;
+    cursor:pointer; transition:background .22s, color .22s;
+  }
+  .tab-btn:last-child { border-right:none; }
+  .tab-btn:hover { background:rgba(143,163,177,.08); color:var(--light); }
+  .tab-btn.active { background:var(--steel); color:var(--dark); }
+
+  /* PANELS */
+  .panel { display:none; position:relative; z-index:10; }
+  .panel.active { display:block; }
+
+  /* GRID — smaller cards so all 21 fit without huge scrolling */
+  .logos-grid {
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(200px, 1fr));
+    gap:16px; max-width:1500px; margin:0 auto;
+    padding:20px 24px 120px;
+  }
+
+  /* scroll hint */
+  .scroll-hint {
+    text-align:center; padding:8px 0 0;
+    font-size:.7rem; color:rgba(143,163,177,.4);
+    letter-spacing:.15em; text-transform:uppercase;
+  }
+
+  /* CARD */
+  .logo-card {
+    background:rgba(14,14,14,.9);
+    border:1px solid var(--border);
+    border-radius:3px; overflow:hidden;
+    backdrop-filter:blur(4px);
+    cursor:pointer;
+    transition:transform .25s ease, box-shadow .25s ease, border-color .25s;
+  }
+  .logo-card:hover {
+    transform:translateY(-4px);
+    box-shadow:0 16px 40px rgba(0,0,0,.6);
+  }
+  .logo-card.regal { border-color:rgba(201,168,76,.25); }
+  .logo-card.regal:hover { border-color:rgba(201,168,76,.5); box-shadow:0 16px 40px rgba(201,168,76,.12); }
+
+  /* Preview — square, image fills it */
+  .card-preview {
+    width:100%; aspect-ratio:1/1;
+    display:flex; align-items:center; justify-content:center;
+    overflow:hidden; position:relative;
+  }
+  .card-preview img {
+    width:88%; height:88%;
+    object-fit:contain;
+    transition:transform .3s ease;
+  }
+  .logo-card:hover .card-preview img { transform:scale(1.06); }
+  .card-preview.full-bleed img { width:100%; height:100%; object-fit:cover; }
+
+  /* Zoom icon overlay */
+  .zoom-icon {
+    position:absolute; bottom:8px; right:8px;
+    width:26px; height:26px; border-radius:50%;
+    background:rgba(0,0,0,.55); border:1px solid rgba(143,163,177,.3);
+    display:flex; align-items:center; justify-content:center;
+    color:var(--steel); font-size:12px;
+    opacity:0; transition:opacity .2s;
+    pointer-events:none;
+  }
+  .logo-card:hover .zoom-icon { opacity:1; }
+
+  /* ══ MODAL POPUP ══ */
+  #modal-overlay {
+    position:fixed; inset:0; z-index:500;
+    background:rgba(0,0,0,.85);
+    backdrop-filter:blur(8px);
+    display:none; align-items:center; justify-content:center;
+    padding:20px;
+  }
+  #modal-overlay.open { display:flex; }
+
+  #modal-box {
+    background:#101318;
+    border:1px solid rgba(143,163,177,.25);
+    border-radius:4px;
+    max-width:680px; width:100%;
+    max-height:90vh;
+    overflow:hidden;
+    position:relative;
+    display:flex; flex-direction:column;
+    animation:modalIn .25s cubic-bezier(.16,1,.3,1);
+  }
+  @keyframes modalIn {
+    from { transform:scale(.92); opacity:0; }
+    to   { transform:scale(1);   opacity:1; }
+  }
+
+  #modal-img-wrap {
+    width:100%; aspect-ratio:4/3;
+    display:flex; align-items:center; justify-content:center;
+    overflow:hidden; position:relative;
+  }
+  #modal-img {
+    max-width:90%; max-height:100%;
+    object-fit:contain;
+  }
+  #modal-regal-wrap {
+    width:100%; aspect-ratio:4/3;
+    display:flex; align-items:center; justify-content:center;
+  }
+
+  #modal-close {
+    position:absolute; top:12px; right:14px;
+    background:rgba(0,0,0,.6); border:1px solid rgba(143,163,177,.3);
+    color:var(--steel); width:32px; height:32px; border-radius:50%;
+    font-size:16px; cursor:pointer; z-index:10;
+    display:flex; align-items:center; justify-content:center;
+    transition:background .2s, color .2s;
+  }
+  #modal-close:hover { background:var(--steel); color:var(--dark); }
+
+  #modal-body {
+    padding:18px 24px 22px;
+    border-top:1px solid var(--border);
+  }
+  #modal-title {
+    font-family:'Cormorant Garamond',serif;
+    font-size:1.2rem; font-weight:400; letter-spacing:.04em;
+    color:var(--light); margin-bottom:8px;
+  }
+  #modal-blurb {
+    font-size:.78rem; color:var(--steel);
+    line-height:1.75; letter-spacing:.02em; margin-bottom:16px;
+  }
+  #modal-vote-row { display:flex; gap:10px; }
+  .modal-vote-btn {
+    flex:1; padding:11px 0; border:1px solid var(--border);
+    background:transparent; cursor:pointer;
+    font-size:.72rem; letter-spacing:.18em; text-transform:uppercase;
+    border-radius:2px; transition:background .22s, color .22s, border-color .22s;
+  }
+  .modal-vote-btn.like    { color:var(--like); }
+  .modal-vote-btn.dislike { color:var(--dislike); }
+  .modal-vote-btn.like:hover    { background:var(--like);    color:#fff; border-color:var(--like); }
+  .modal-vote-btn.dislike:hover { background:var(--dislike); color:#fff; border-color:var(--dislike); }
+  .modal-vote-btn:disabled { opacity:.4; cursor:default; }
+  #modal-voted { display:none; font-size:.7rem; letter-spacing:.14em; text-transform:uppercase; color:var(--steel); text-align:center; padding-top:6px; }
+
+  /* BG variants */
+  .bg-dark  { background:#0d0d0d; }
+  .bg-light { background:#e8e4dc; }
+  .bg-mid   { background:#1e2830; }
+  .bg-slate { background:#2a3540; }
+  .bg-warm  { background:#2c2318; }
+  .bg-white { background:#f5f5f5; }
+  .bg-navy  { background:#0f1a2e; }
+  .bg-regal { background:linear-gradient(135deg, #0d1117 0%, #1a2030 50%, #0d1117 100%); }
+  .bg-gold  { background:linear-gradient(135deg, #1a1408 0%, #2a2010 50%, #1a1408 100%); }
+  .bg-deep  { background:linear-gradient(135deg, #0a0010 0%, #14001e 50%, #0a0010 100%); }
+
+  /* Regal CSS logo renders */
+  .regal-render {
+    width:100%; height:100%;
+    display:flex; align-items:center; justify-content:center;
+    flex-direction:column; gap:0;
+  }
+
+  /* — Regal A: Gold foil letterpress — */
+  .regal-a .mi-mark {
+    font-family:'Playfair Display',serif;
+    font-size:clamp(64px, 10vw, 96px);
+    font-weight:700;
+    background:linear-gradient(135deg, #8a6a1a 0%, #e8c84a 30%, #fde98a 50%, #c9a02a 70%, #8a6a1a 100%);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    letter-spacing:.12em;
+    filter:drop-shadow(0 2px 8px rgba(201,168,76,.4));
+  }
+  .regal-a .rule { width:80px; height:1px; background:linear-gradient(90deg, transparent, #c9a84c, transparent); margin:6px auto; }
+  .regal-a .sub {
+    font-family:'Barlow',sans-serif; font-weight:300;
+    font-size:.55rem; letter-spacing:.5em; text-transform:uppercase;
+    color:#c9a84c; opacity:.8;
+  }
+  .regal-a .arrow-wrap {
+    position:absolute; top:0; left:0; right:0; bottom:0;
+    display:flex; align-items:center; justify-content:center;
+    pointer-events:none;
+  }
+
+  /* — Regal B: Embossed platinum — */
+  .regal-b .mi-mark {
+    font-family:'Playfair Display',serif;
+    font-size:clamp(60px, 9vw, 88px);
+    font-weight:700;
+    background:linear-gradient(160deg, #c8d0d8 0%, #e8eef2 25%, #a8b4bc 50%, #dce4e8 75%, #98a8b0 100%);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    letter-spacing:.1em;
+    filter:drop-shadow(0 1px 4px rgba(255,255,255,.2));
+  }
+  .regal-b .rule { width:60px; height:1px; background:linear-gradient(90deg, transparent, #b0c0c8, transparent); margin:6px auto; }
+  .regal-b .sub { font-size:.52rem; letter-spacing:.5em; color:#8fa3b1; opacity:.9; text-transform:uppercase; }
+
+  /* — Regal C: Navy & Heraldic gold — */
+  .regal-c-outer {
+    width:min(72%, 200px); aspect-ratio:1/1;
+    border:2px solid rgba(201,168,76,.6);
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    position:relative;
+    background:radial-gradient(circle, #1a2744 0%, #0d1625 100%);
+    box-shadow:0 0 30px rgba(201,168,76,.15), inset 0 0 20px rgba(0,0,50,.5);
+  }
+  .regal-c-outer::before {
+    content:'';
+    position:absolute; inset:4px;
+    border:1px solid rgba(201,168,76,.3);
+    border-radius:50%;
+  }
+  .regal-c .mi-mark {
+    font-family:'Playfair Display',serif;
+    font-size:clamp(42px,7vw,64px); font-weight:700;
+    background:linear-gradient(135deg, #c9a84c 0%, #fde98a 50%, #c9a84c 100%);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    letter-spacing:.1em;
+  }
+
+  /* — Regal D: Diamond cut geometric — */
+  .regal-d-diamond {
+    width:min(68%, 190px); aspect-ratio:1/1;
+    transform:rotate(45deg);
+    border:2px solid rgba(143,163,177,.4);
+    background:linear-gradient(135deg, #0a1020 0%, #1a2030 100%);
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 0 40px rgba(143,163,177,.1);
+  }
+  .regal-d-diamond::before {
+    content:'';
+    position:absolute;
+    width:calc(100% - 12px); height:calc(100% - 12px);
+    border:1px solid rgba(143,163,177,.2);
+  }
+  .regal-d .mi-mark {
+    transform:rotate(-45deg);
+    font-family:'Playfair Display',serif;
+    font-size:clamp(36px,6vw,52px); font-weight:700;
+    background:linear-gradient(160deg, #c8d0d8 0%, #e8eef2 40%, #8fa3b1 100%);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    letter-spacing:.12em;
+  }
+
+  /* — Regal E: Dark velvet with emblem — */
+  .regal-e-crest {
+    width:min(72%,200px);
+    padding:20px 24px 16px;
+    background:linear-gradient(160deg, #160010 0%, #220018 100%);
+    border:1px solid rgba(160,80,200,.35);
+    box-shadow:0 0 40px rgba(160,80,200,.1), inset 0 0 20px rgba(100,0,150,.1);
+    display:flex; flex-direction:column; align-items:center; gap:4px;
+  }
+  .regal-e-crest::before {
+    content:'✦';
+    color:rgba(160,80,200,.5); font-size:10px; letter-spacing:8px;
+  }
+  .regal-e .mi-mark {
+    font-family:'Playfair Display',serif;
+    font-size:clamp(40px,7vw,60px); font-weight:700;
+    background:linear-gradient(135deg, #8a28c8 0%, #d080ff 40%, #b048e8 70%, #7020a8 100%);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    letter-spacing:.12em;
+  }
+  .regal-e-crest::after {
+    content:'✦';
+    color:rgba(160,80,200,.5); font-size:10px; letter-spacing:8px;
+  }
+  .regal-e .sub { font-size:.48rem; letter-spacing:.55em; color:rgba(180,100,220,.7); text-transform:uppercase; }
+
+  /* Category badge */
+  .cat-badge {
+    position:absolute; top:14px; left:14px;
+    font-size:.6rem; letter-spacing:.18em; text-transform:uppercase;
+    padding:4px 10px; border-radius:1px;
+    background:rgba(0,0,0,.55); color:var(--steel);
+    backdrop-filter:blur(4px); border:1px solid var(--border);
+  }
+  .cat-badge.gold-badge {
+    color:var(--gold); border-color:rgba(201,168,76,.3);
+    background:rgba(20,14,0,.7);
+  }
+
+  /* CARD BODY — compact on tile, full detail in popup */
+  .card-body { padding:12px 14px 12px; }
+  .card-body h3 {
+    font-family:'Cormorant Garamond',serif;
+    font-size:.9rem; font-weight:400; letter-spacing:.03em;
+    margin-bottom:8px; line-height:1.3;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .logo-card.regal .card-body h3 { color:#d4b870; }
+
+  /* VOTE */
+  .vote-row { display:flex; gap:10px; }
+  .vote-btn {
+    flex:1; padding:11px 0; border:1px solid var(--border);
+    background:transparent; cursor:pointer;
+    font-size:.7rem; letter-spacing:.18em; text-transform:uppercase;
+    border-radius:2px; transition:background .22s, color .22s, border-color .22s;
+  }
+  .vote-btn.like    { color:var(--like); }
+  .vote-btn.dislike { color:var(--dislike); }
+  .vote-btn.like:hover,    .vote-btn.like.active    { background:var(--like);    color:#fff; border-color:var(--like); }
+  .vote-btn.dislike:hover, .vote-btn.dislike.active { background:var(--dislike); color:#fff; border-color:var(--dislike); }
+  .vote-btn:disabled { opacity:.4; cursor:default; }
+
+  .voted-label {
+    display:none; font-size:.68rem; letter-spacing:.14em;
+    text-transform:uppercase; color:var(--steel);
+    text-align:center; padding-top:6px;
+  }
+
+  /* TOAST */
+  #toast {
+    position:fixed; bottom:28px; left:50%; transform:translateX(-50%);
+    background:rgba(18,18,18,.96); border:1px solid var(--border);
+    backdrop-filter:blur(10px); color:var(--light); padding:11px 28px;
+    font-size:.75rem; letter-spacing:.12em; border-radius:2px;
+    opacity:0; pointer-events:none; transition:opacity .3s; z-index:999;
+  }
+  #toast.show { opacity:1; }
+
+  .footer {
+    position:relative; z-index:10;
+    text-align:center; padding:40px;
+    border-top:1px solid var(--border);
+  }
+  .footer a {
+    color:var(--steel); font-size:.76rem; letter-spacing:.2em;
+    text-transform:uppercase; text-decoration:none; transition:color .2s;
+  }
+  .footer a:hover { color:var(--light); }
+</style>
+</head>
+<body>
+
+<!-- ══ TRUCK HIGHWAY BACKGROUND ══ -->
+<div id="truck-highway">
+
+  <!-- Beam lights -->
+  <div class="truck-beam b1"></div>
+  <div class="truck-beam b2"></div>
+  <div class="truck-beam b3"></div>
+
+  <!-- Lane 1 trucks (mid-size) -->
+  <svg class="truck lane1 d1" width="320" height="110" viewBox="0 0 320 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="0" y="30" width="220" height="70" rx="4" fill="#1e2830" stroke="#304050" stroke-width="1.5"/>
+    <rect x="220" y="10" width="88" height="90" rx="5" fill="#253040" stroke="#304050" stroke-width="1.5"/>
+    <rect x="228" y="18" width="70" height="50" rx="3" fill="#1a4060" opacity=".7"/>
+    <rect x="234" y="23" width="58" height="38" rx="2" fill="#0d2535" opacity=".8"/>
+    <circle cx="50" cy="102" r="14" fill="#111" stroke="#304050" stroke-width="2"/>
+    <circle cx="50" cy="102" r="7" fill="#222"/>
+    <circle cx="160" cy="102" r="14" fill="#111" stroke="#304050" stroke-width="2"/>
+    <circle cx="160" cy="102" r="7" fill="#222"/>
+    <circle cx="270" cy="102" r="14" fill="#111" stroke="#304050" stroke-width="2"/>
+    <circle cx="270" cy="102" r="7" fill="#222"/>
+    <rect x="0" y="40" width="8" height="20" rx="1" fill="#c9a84c" opacity=".6"/>
+    <rect x="304" y="40" width="8" height="14" rx="1" fill="#ffffff" opacity=".5"/>
+    <text x="60" y="75" font-family="Arial" font-size="11" fill="#4a6070" letter-spacing="2">MI LOGISTICS</text>
+  </svg>
+
+  <svg class="truck lane1 d2" width="320" height="110" viewBox="0 0 320 110" fill="none">
+    <rect x="0" y="30" width="220" height="70" rx="4" fill="#1a2030" stroke="#2a3545" stroke-width="1.5"/>
+    <rect x="220" y="10" width="88" height="90" rx="5" fill="#20283a" stroke="#2a3545" stroke-width="1.5"/>
+    <rect x="228" y="18" width="70" height="50" rx="3" fill="#162040" opacity=".7"/>
+    <circle cx="50" cy="102" r="14" fill="#111" stroke="#2a3545" stroke-width="2"/>
+    <circle cx="50" cy="102" r="7" fill="#1c1c1c"/>
+    <circle cx="160" cy="102" r="14" fill="#111" stroke="#2a3545" stroke-width="2"/>
+    <circle cx="160" cy="102" r="7" fill="#1c1c1c"/>
+    <circle cx="270" cy="102" r="14" fill="#111" stroke="#2a3545" stroke-width="2"/>
+    <circle cx="270" cy="102" r="7" fill="#1c1c1c"/>
+    <rect x="0" y="40" width="8" height="20" rx="1" fill="#c9a84c" opacity=".5"/>
+    <rect x="304" y="40" width="8" height="14" rx="1" fill="#ffffff" opacity=".4"/>
+    <text x="60" y="75" font-family="Arial" font-size="11" fill="#3a5060" letter-spacing="2">MI LOGISTICS</text>
+  </svg>
+
+  <svg class="truck lane1 d3" width="320" height="110" viewBox="0 0 320 110" fill="none">
+    <rect x="0" y="30" width="220" height="70" rx="4" fill="#162020" stroke="#253530" stroke-width="1.5"/>
+    <rect x="220" y="10" width="88" height="90" rx="5" fill="#1c2828" stroke="#253530" stroke-width="1.5"/>
+    <rect x="228" y="18" width="70" height="50" rx="3" fill="#122028" opacity=".7"/>
+    <circle cx="50" cy="102" r="14" fill="#111" stroke="#253530" stroke-width="2"/>
+    <circle cx="50" cy="102" r="7" fill="#1c1c1c"/>
+    <circle cx="160" cy="102" r="14" fill="#111" stroke="#253530" stroke-width="2"/>
+    <circle cx="160" cy="102" r="7" fill="#1c1c1c"/>
+    <circle cx="270" cy="102" r="14" fill="#111" stroke="#253530" stroke-width="2"/>
+    <circle cx="270" cy="102" r="7" fill="#1c1c1c"/>
+    <rect x="0" y="40" width="8" height="20" rx="1" fill="#5c9e72" opacity=".5"/>
+    <rect x="304" y="40" width="8" height="14" rx="1" fill="#ffffff" opacity=".4"/>
+  </svg>
+
+  <!-- Lane 2 trucks (smaller, slower) -->
+  <svg class="truck lane2 d4" width="280" height="90" viewBox="0 0 280 90" fill="none">
+    <rect x="0" y="20" width="190" height="60" rx="4" fill="#181820" stroke="#282838" stroke-width="1"/>
+    <rect x="190" y="5" width="78" height="75" rx="5" fill="#202028" stroke="#282838" stroke-width="1"/>
+    <rect x="197" y="12" width="60" height="40" rx="2" fill="#0d1530" opacity=".6"/>
+    <circle cx="42" cy="83" r="12" fill="#0f0f0f" stroke="#282838" stroke-width="1.5"/>
+    <circle cx="42" cy="83" r="6" fill="#1a1a1a"/>
+    <circle cx="140" cy="83" r="12" fill="#0f0f0f" stroke="#282838" stroke-width="1.5"/>
+    <circle cx="140" cy="83" r="6" fill="#1a1a1a"/>
+    <circle cx="236" cy="83" r="12" fill="#0f0f0f" stroke="#282838" stroke-width="1.5"/>
+    <circle cx="236" cy="83" r="6" fill="#1a1a1a"/>
+    <rect x="0" y="30" width="6" height="16" rx="1" fill="#c9a84c" opacity=".4"/>
+    <rect x="267" y="32" width="6" height="12" rx="1" fill="#fff" opacity=".35"/>
+  </svg>
+
+  <svg class="truck lane2 d5" width="280" height="90" viewBox="0 0 280 90" fill="none">
+    <rect x="0" y="20" width="190" height="60" rx="4" fill="#141825" stroke="#242838" stroke-width="1"/>
+    <rect x="190" y="5" width="78" height="75" rx="5" fill="#1a2030" stroke="#242838" stroke-width="1"/>
+    <rect x="197" y="12" width="60" height="40" rx="2" fill="#0a1428" opacity=".6"/>
+    <circle cx="42" cy="83" r="12" fill="#0f0f0f" stroke="#242838" stroke-width="1.5"/>
+    <circle cx="42" cy="83" r="6" fill="#1a1a1a"/>
+    <circle cx="140" cy="83" r="12" fill="#0f0f0f" stroke="#242838" stroke-width="1.5"/>
+    <circle cx="140" cy="83" r="6" fill="#1a1a1a"/>
+    <circle cx="236" cy="83" r="12" fill="#0f0f0f" stroke="#242838" stroke-width="1.5"/>
+    <circle cx="236" cy="83" r="6" fill="#1a1a1a"/>
+    <rect x="0" y="30" width="6" height="16" rx="1" fill="#c9a84c" opacity=".4"/>
+    <rect x="267" y="32" width="6" height="12" rx="1" fill="#fff" opacity=".3"/>
+  </svg>
+
+  <!-- Lane 3 trucks (largest, fastest) -->
+  <svg class="truck lane3 d6" width="360" height="120" viewBox="0 0 360 120" fill="none">
+    <rect x="0" y="32" width="248" height="76" rx="4" fill="#1c2435" stroke="#2c3445" stroke-width="2"/>
+    <rect x="248" y="8" width="100" height="100" rx="6" fill="#232c3c" stroke="#2c3445" stroke-width="2"/>
+    <rect x="258" y="18" width="78" height="55" rx="3" fill="#162038" opacity=".75"/>
+    <rect x="264" y="23" width="66" height="42" rx="2" fill="#0a1828" opacity=".85"/>
+    <circle cx="56" cy="112" r="16" fill="#0d0d0d" stroke="#2c3445" stroke-width="2"/>
+    <circle cx="56" cy="112" r="8" fill="#1c1c1c"/>
+    <circle cx="180" cy="112" r="16" fill="#0d0d0d" stroke="#2c3445" stroke-width="2"/>
+    <circle cx="180" cy="112" r="8" fill="#1c1c1c"/>
+    <circle cx="304" cy="112" r="16" fill="#0d0d0d" stroke="#2c3445" stroke-width="2"/>
+    <circle cx="304" cy="112" r="8" fill="#1c1c1c"/>
+    <rect x="0" y="44" width="10" height="24" rx="1" fill="#c9a84c" opacity=".7"/>
+    <rect x="342" y="44" width="10" height="18" rx="1" fill="#ffffff" opacity=".55"/>
+    <text x="60" y="82" font-family="Arial" font-size="12" fill="#4a6070" letter-spacing="2.5" font-weight="bold">MI LOGISTICS LIMITED</text>
+  </svg>
+
+  <!-- Road -->
+  <div class="road"><div class="road-line"></div></div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <img src="/static/logo.png" alt="MI Logistics">
+  <div class="nav-links">
+    <a href="/">← Home</a>
+    <a href="/all-logos">All 21 Logos</a>
+    <a href="/results">Results</a>
+  </div>
+</nav>
+
+<div class="page-hero">
+  <h1>Brand Concepts</h1>
+  <p>Select a category. Like or pass each concept — your choices are saved.</p>
+</div>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('logo-ideas',this)">Logo Ideas (21)</button>
+  <button class="tab-btn"        onclick="switchTab('regal',this)">Regal &amp; Corporate (5)</button>
+  <button class="tab-btn"        onclick="switchTab('truck-display',this)">Truck Display (5)</button>
+</div>
+<p class="scroll-hint" style="position:relative;z-index:10;margin-top:10px;">↓ scroll to see all concepts</p>
+
+<!-- ══ LOGO IDEAS ══ -->
+<div class="panel active" id="panel-logo-ideas">
+  <div class="logos-grid" id="grid-logo-ideas"></div>
+</div>
+
+<!-- ══ REGAL & CORPORATE ══ -->
+<div class="panel" id="panel-regal">
+  <div class="logos-grid" id="grid-regal"></div>
+</div>
+
+<!-- ══ TRUCK DISPLAY ══ -->
+<div class="panel" id="panel-truck-display">
+  <div class="logos-grid" id="grid-truck-display"></div>
+</div>
+
+<div class="footer">
+  <a href="/results">View full results dashboard →</a>
+</div>
+
+<div id="toast"></div>
+
+<!-- ══ MODAL POPUP ══ -->
+<div id="modal-overlay" onclick="closeModal(event)">
+  <div id="modal-box">
+    <button id="modal-close" onclick="closeModalDirect()">✕</button>
+    <div id="modal-img-wrap">
+      <img id="modal-img" src="" alt="">
+    </div>
+    <div id="modal-regal-wrap" style="display:none"></div>
+    <div id="modal-body">
+      <div id="modal-title"></div>
+      <div id="modal-blurb"></div>
+      <div id="modal-vote-row">
+        <button class="modal-vote-btn like"    id="modal-like-btn"    onclick="modalVote('like')">♥ Like</button>
+        <button class="modal-vote-btn dislike" id="modal-dislike-btn" onclick="modalVote('dislike')">✕ Pass</button>
+      </div>
+      <div id="modal-voted"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════
+//  LOGO IDEAS — all 21 concepts
+// ══════════════════════════════════════════════════════════
+const LOGO_IDEAS = [
+  { id:'li-01', name:'Concept 1 — Steel Woven Arrow',      src:'/static/logo_13_woven.png',   bg:'bg-white', mod:'', blurb:'Intricate woven/braided letterforms with a silver arrow sweep. Commands instant authority. Premium print and embossing potential.' },
+  { id:'li-02', name:'Concept 2 — Circuit Board Teal',      src:'/static/logo_14_circuit2.png',bg:'bg-white', mod:'', blurb:'Simplified circuit-board MI with bold teal glow arrow. Tech-forward, clean, and strong at small digital sizes.' },
+  { id:'li-03', name:'Concept 3 — Globe Map Compact',       src:'/static/logo_15_globe.png',   bg:'bg-white', mod:'', blurb:'Compact globe integrated into the mark with dashed orbit arrow. Communicates international reach in a tight, versatile format.' },
+  { id:'li-04', name:'Concept 4 — Speed Swoosh',            src:'/static/logo_16_speed.png',   bg:'bg-white', mod:'', blurb:'Aerodynamic speed lines with 3D chrome letterforms. Projects momentum and reliability. Classic logistics energy.' },
+  { id:'li-05', name:'Concept 5 — 3D Architectural',        src:'/static/logo_17_3d.png',      bg:'bg-white', mod:'', blurb:'Isometric 3D block construction. Suggests structural solidity and warehousing depth. Strong on vehicle livery.' },
+  { id:'li-06', name:'Concept 6 — Navy & Gold Arrows',      src:'/static/logo_18_navy_gold.png',bg:'bg-dark', mod:'', blurb:'Bold navy with gold diagonal arrow sweep. Premium two-tone palette — stands apart from standard grey logistics branding.' },
+  { id:'li-07', name:'Concept 7 — Royal Blue Speed',        src:'/static/logo_19_navy_blue.png',bg:'bg-dark', mod:'', blurb:'Deep royal blue with concentric speed curves. Confident and corporate. Works well on white fleet vehicles.' },
+  { id:'li-08', name:'Concept 8 — Teal Dark Circuit',       src:'/static/logo_20_teal_dark.png',bg:'bg-dark', mod:'', blurb:'Dark base with teal circuit texture and glowing arrow. Digital-native design with strong social media impact.' },
+  { id:'li-09', name:'Concept 9 — Purple 3D Premium',       src:'/static/logo_21_purple.png',  bg:'bg-dark', mod:'', blurb:'Bold purple gradient with architectural 3D letterforms. Distinctive luxury positioning. Memorable at a distance.' },
+  { id:'li-10', name:'Concept 10 — Chrome Red (RS Transit)',src:'/static/logo_01_chrome.png',  bg:'bg-dark', mod:'', blurb:'Bold chrome red MI — aggressive and impactful. Great for social proof posts and truck-side display.' },
+  { id:'li-11', name:'Concept 11 — Steel Arrow (Clean)',    src:'/static/logo_09_steel.png',   bg:'bg-white', mod:'', blurb:'Clean 3D chrome with upward arrow. Professional and timeless. Strong on white for documents and digital.' },
+  { id:'li-12', name:'Concept 12 — Tech Circuit Glow',      src:'/static/logo_02_tech.png',    bg:'bg-dark', mod:'', blurb:'Teal circuit-board MI with digital glow. Positions MI Logistics as a tech-forward operator.' },
+  { id:'li-13', name:'Concept 13 — World Map Global',       src:'/static/logo_03_world.png',   bg:'bg-mid',  mod:'', blurb:'Globe with trucks and ships orbiting the MI mark. Communicates international, multi-modal capability.' },
+  { id:'li-14', name:'Concept 14 — Union Jack Rope',        src:'/static/logo_04_uj_rope.png', bg:'bg-dark', mod:'', blurb:'Woven rope texture MI on Union Jack. Signals British heritage, strength and reliability.' },
+  { id:'li-15', name:'Concept 15 — Geometric Tile',         src:'/static/logo_05_tile.png',    bg:'bg-light', mod:'', blurb:'Ornate geometric tile pattern with warm earth tones. Stands out strongly from standard logistics branding.' },
+  { id:'li-16', name:'Concept 16 — Red Curtain Social',     src:'/static/logo_06_red.png',     bg:'bg-dark', mod:'', blurb:'White MI on red with theatrical staging. Bold for social media and promotional materials.' },
+  { id:'li-17', name:'Concept 17 — Ornate Blue Mosaic',     src:'/static/logo_07_ornate.png',  bg:'bg-mid',  mod:'', blurb:'Intricate blue and gold mosaic MI. Luxury positioning with artisan craftsmanship feel.' },
+  { id:'li-18', name:'Concept 18 — Silver 3D & Truck',      src:'/static/logo_08_silver.png',  bg:'bg-slate', mod:'', blurb:'Metallic 3D letterforms with HGV truck silhouette. Strong brand-fit for fleet livery and vehicle graphics.' },
+  { id:'li-19', name:'Concept 19 — Union Jack Compact',     src:'/static/logo_10_uj_small.png',bg:'bg-light', mod:'', blurb:'Compact MI with Union Jack inset. Works at small sizes — ideal for digital favicons and vehicle badges.' },
+  { id:'li-20', name:'Concept 20 — Union Jack Ornate',      src:'/static/logo_11_uj_ornate.png',bg:'bg-dark', mod:'', blurb:'Decorative MI with Union Jack and arrow. Patriotic statement of British independent logistics operator.' },
+  { id:'li-21', name:'Concept 21 — London Skyline',         src:'/static/logo_12_london.png',  bg:'bg-mid',  mod:'', blurb:'MI built from London skyline iconography with purple arrow. Regional identity with national ambition.' },
+];
+
+// ══════════════════════════════════════════════════════════
+//  REGAL & CORPORATE — 5 CSS-rendered premium concepts
+// ══════════════════════════════════════════════════════════
+const REGAL_CONCEPTS = [
+  {
+    id: 'regal-a',
+    name: 'Regal I — Gold Foil Letterpress',
+    cls: 'regal-a',
+    bg: 'bg-gold',
+    html: `<div class="regal-render regal-a">
+      <div class="mi-mark">MI</div>
+      <div class="rule"></div>
+      <div class="sub">Logistics &nbsp;·&nbsp; Limited</div>
+    </div>`,
+    blurb: 'Gold foil letterpress treatment on deep black. Luxury goods positioning — conveys rarity and exclusivity. Ideal for premium client proposals, executive stationery and high-end fleet.'
+  },
+  {
+    id: 'regal-b',
+    name: 'Regal II — Platinum Emboss',
+    cls: 'regal-b',
+    bg: 'bg-regal',
+    html: `<div class="regal-render regal-b">
+      <div class="mi-mark">MI</div>
+      <div class="rule"></div>
+      <div class="sub">Logistics &nbsp;·&nbsp; Limited</div>
+    </div>`,
+    blurb: 'Platinum and silver emboss on deep navy-black. Polished corporate authority. Sits comfortably alongside premium freight competitors. Strong for contracts and boardroom presentations.'
+  },
+  {
+    id: 'regal-c',
+    name: 'Regal III — Heraldic Crest',
+    cls: 'regal-c',
+    bg: 'bg-navy',
+    html: `<div class="regal-render regal-c">
+      <div class="regal-c-outer">
+        <div class="mi-mark">MI</div>
+      </div>
+    </div>`,
+    blurb: 'Circular heraldic crest in navy and gold. Evokes centuries of merchant trade and shipping tradition. Exceptional for embossed letter seals, branded uniforms and premium vehicle badges.'
+  },
+  {
+    id: 'regal-d',
+    name: 'Regal IV — Diamond Cut',
+    cls: 'regal-d',
+    bg: 'bg-regal',
+    html: `<div class="regal-render regal-d">
+      <div class="regal-d-diamond">
+        <div class="mi-mark">MI</div>
+      </div>
+    </div>`,
+    blurb: 'Diamond-cut geometric framing on deep slate. Precision engineering aesthetic. Targets premium cargo, aerospace logistics, and high-value freight sectors where trust is paramount.'
+  },
+  {
+    id: 'regal-e',
+    name: 'Regal V — Velvet Crest',
+    cls: 'regal-e',
+    bg: 'bg-deep',
+    html: `<div class="regal-render regal-e">
+      <div class="regal-e-crest">
+        <div class="mi-mark">MI</div>
+        <div class="sub">Logistics &nbsp;·&nbsp; Limited</div>
+      </div>
+    </div>`,
+    blurb: 'Deep velvet purple with amethyst-tone letterforms. Bold and distinctive — stands completely apart from grey/blue logistics convention. Owns the luxury lane for specialist cargo and VIP freight.'
+  }
+];
+
+// ══════════════════════════════════════════════════════════
+//  TRUCK DISPLAY
+// ══════════════════════════════════════════════════════════
+const TRUCK_DISPLAY = [
+  { id:'td-dragon',      name:'Social — "Another Load Powered By MI"', src:'/static/truck_dragon.png', bg:'bg-dark', mod:'', fullBleed:true, blurb:'Bold social media creative with the MI dragon. Great for LinkedIn, Instagram, and Facebook posts after deliveries.' },
+  { id:'td-side-dark',   name:'Livery — Dark Fleet',  src:'/static/logo_09_steel.png', bg:'bg-dark',  mod:'steel-glow', blurb:'Dark fleet livery concept. Steel-grey branding on matte black cab and trailer. High impact at distance.' },
+  { id:'td-side-white',  name:'Livery — White Fleet', src:'/static/logo_09_steel.png', bg:'bg-white', mod:'invert',     blurb:'White fleet livery. Clean, professional, highly visible on motorways.' },
+  { id:'td-side-navy',   name:'Livery — Navy Fleet',  src:'/static/logo_09_steel.png', bg:'bg-mid',   mod:'cold-tint',  blurb:'Navy blue fleet livery. Strong brand differentiation. Projects reliability and premium positioning.' },
+  { id:'td-side-slate',  name:'Livery — Graphite Fleet',src:'/static/logo_09_steel.png',bg:'bg-slate', mod:'steel-glow', blurb:'Graphite and steel. Contemporary industrial edge.' },
+];
+
+// CSS modifier classes
+const MOD_CSS = {
+  'steel-glow': 'filter:brightness(1.2) drop-shadow(0 0 22px rgba(143,163,177,.6))',
+  'invert':     'filter:invert(1) brightness(.88)',
+  'warm-tint':  'filter:sepia(.35) brightness(1.1)',
+  'cold-tint':  'filter:hue-rotate(190deg) saturate(.7) brightness(1.1)',
+  '': ''
+};
+
+// ══════════════════════════════════════════════════════════
+//  BUILD GRIDS
+// ══════════════════════════════════════════════════════════
+function buildGrid(items, category, gridId) {
+  const grid = document.getElementById(gridId);
+  items.forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'logo-card';
+    const modStyle = item.mod && MOD_CSS[item.mod] ? `style="${MOD_CSS[item.mod]}"` : '';
+    const previewClass = item.fullBleed ? 'full-bleed' : '';
+    card.innerHTML = `
+      <div class="card-preview ${item.bg} ${previewClass}" onclick="openModal('${item.id}','${category}')">
+        <span class="cat-badge">${category === 'logo-ideas' ? 'Logo' : 'Truck'}</span>
+        <img src="${item.src}" alt="${item.name}" ${modStyle}>
+        <div class="zoom-icon">⤢</div>
+      </div>
+      <div class="card-body">
+        <h3>${item.name}</h3>
+        <div class="vote-row" id="vrow-${item.id}">
+          <button class="vote-btn like"    onclick="vote('${item.id}','${category}','like',   this)">♥</button>
+          <button class="vote-btn dislike" onclick="vote('${item.id}','${category}','dislike',this)">✕</button>
+        </div>
+        <p class="voted-label" id="vlbl-${item.id}"></p>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+function buildRegalGrid() {
+  const grid = document.getElementById('grid-regal');
+  REGAL_CONCEPTS.forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'logo-card regal';
+    card.innerHTML = `
+      <div class="card-preview ${item.bg}" onclick="openModal('${item.id}','regal')">
+        <span class="cat-badge gold-badge">Regal</span>
+        ${item.html}
+        <div class="zoom-icon">⤢</div>
+      </div>
+      <div class="card-body">
+        <h3>${item.name}</h3>
+        <div class="vote-row" id="vrow-${item.id}">
+          <button class="vote-btn like"    onclick="vote('${item.id}','regal','like',   this)">♥</button>
+          <button class="vote-btn dislike" onclick="vote('${item.id}','regal','dislike',this)">✕</button>
+        </div>
+        <p class="voted-label" id="vlbl-${item.id}"></p>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+buildGrid(LOGO_IDEAS,    'logo-ideas',    'grid-logo-ideas');
+buildRegalGrid();
+buildGrid(TRUCK_DISPLAY, 'truck-display', 'grid-truck-display');
+
+// ══════════════════════════════════════════════════════════
+//  TABS
+// ══════════════════════════════════════════════════════════
+function switchTab(panelId, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + panelId).classList.add('active');
+  btn.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ══════════════════════════════════════════════════════════
+//  VOTING
+// ══════════════════════════════════════════════════════════
+async function vote(logoId, category, response, btn) {
+  try {
+    const res = await fetch('/vote', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ logo: logoId, category, response })
+    });
+    if (!res.ok) throw new Error();
+    document.getElementById('vrow-' + logoId)
+      .querySelectorAll('.vote-btn').forEach(b => {
+        b.disabled = true;
+        if (b === btn) b.classList.add('active');
+      });
+    const lbl = document.getElementById('vlbl-' + logoId);
+    lbl.style.display = 'block';
+    lbl.textContent = response === 'like' ? '✓ Recorded as liked' : '✓ Recorded as passed';
+    showToast(response === 'like' ? '♥ Liked — saved.' : '✕ Passed — saved.');
+  } catch { showToast('Error saving. Please try again.'); }
+}
+
+const toast = document.getElementById('toast');
+function showToast(msg) {
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2000);
+}
+
+// ══ MODAL ══
+let modalCurrentId = null;
+let modalCurrentCat = null;
+
+// Build lookup maps for modal data
+const ALL_ITEMS = {};
+LOGO_IDEAS.forEach(i => ALL_ITEMS[i.id] = {...i, cat:'logo-ideas'});
+REGAL_CONCEPTS.forEach(i => ALL_ITEMS[i.id] = {...i, cat:'regal'});
+TRUCK_DISPLAY.forEach(i => ALL_ITEMS[i.id] = {...i, cat:'truck-display'});
+
+function openModal(id, category) {
+  const item = ALL_ITEMS[id];
+  if (!item) return;
+
+  modalCurrentId  = id;
+  modalCurrentCat = category;
+
+  document.getElementById('modal-title').textContent = item.name;
+  document.getElementById('modal-blurb').textContent = item.blurb || '';
+
+  const imgWrap   = document.getElementById('modal-img-wrap');
+  const regalWrap = document.getElementById('modal-regal-wrap');
+
+  if (item.html) {
+    // Regal CSS render
+    imgWrap.style.display   = 'none';
+    regalWrap.style.display = 'flex';
+    regalWrap.innerHTML     = item.html;
+  } else {
+    imgWrap.style.display   = 'flex';
+    regalWrap.style.display = 'none';
+    const img = document.getElementById('modal-img');
+    img.src = item.src;
+    img.style = item.mod && MOD_CSS[item.mod] ? MOD_CSS[item.mod] : '';
+
+    // Set bg on img wrap
+    const bgMap = {
+      'bg-dark':'#0d0d0d','bg-light':'#e8e4dc','bg-mid':'#1e2830',
+      'bg-slate':'#2a3540','bg-warm':'#2c2318','bg-white':'#f5f5f5',
+      'bg-navy':'#0f1a2e','bg-regal':'#141820','bg-gold':'#1a1408',
+      'bg-deep':'#0a0010'
+    };
+    imgWrap.style.background = bgMap[item.bg] || '#0d0d0d';
+  }
+
+  // Reset vote buttons based on existing vote
+  const likeBtn    = document.getElementById('modal-like-btn');
+  const dislikeBtn = document.getElementById('modal-dislike-btn');
+  const votedLabel = document.getElementById('modal-voted');
+  const cardLabel  = document.getElementById('vlbl-' + id);
+
+  if (cardLabel && cardLabel.style.display !== 'none' && cardLabel.textContent) {
+    likeBtn.disabled    = true;
+    dislikeBtn.disabled = true;
+    votedLabel.style.display = 'block';
+    votedLabel.textContent   = cardLabel.textContent;
+  } else {
+    likeBtn.disabled    = false;
+    dislikeBtn.disabled = false;
+    votedLabel.style.display = 'none';
+  }
+
+  document.getElementById('modal-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModalDirect() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('modal-overlay')) closeModalDirect();
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModalDirect(); });
+
+async function modalVote(response) {
+  if (!modalCurrentId) return;
+  const likeBtn    = document.getElementById('modal-like-btn');
+  const dislikeBtn = document.getElementById('modal-dislike-btn');
+  const votedLabel = document.getElementById('modal-voted');
+
+  try {
+    const res = await fetch('/vote', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ logo: modalCurrentId, category: modalCurrentCat, response })
+    });
+    if (!res.ok) throw new Error();
+
+    likeBtn.disabled    = true;
+    dislikeBtn.disabled = true;
+    const msg = response === 'like' ? '✓ Liked' : '✓ Passed';
+    votedLabel.style.display = 'block';
+    votedLabel.textContent   = msg;
+
+    // Also update the card tile
+    const row = document.getElementById('vrow-' + modalCurrentId);
+    if (row) {
+      row.querySelectorAll('.vote-btn').forEach(b => {
+        b.disabled = true;
+        if ((response==='like' && b.classList.contains('like')) ||
+            (response==='dislike' && b.classList.contains('dislike'))) {
+          b.classList.add('active');
+        }
+      });
+    }
+    const lbl = document.getElementById('vlbl-' + modalCurrentId);
+    if (lbl) { lbl.style.display='block'; lbl.textContent = response==='like'?'✓ Liked':'✓ Passed'; }
+
+    showToast(response === 'like' ? '♥ Liked — saved.' : '✕ Passed — saved.');
+  } catch { showToast('Error saving. Please try again.'); }
+}
+</script>
+</body>
+</html>

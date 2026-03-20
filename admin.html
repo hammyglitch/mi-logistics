@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MI Logistics — Admin Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --dark:#0a0c0f;--card:#0f1318;--light:#f2f0eb;--steel:#8fa3b1;
+  --border:rgba(143,163,177,.15);--like:#5c9e72;--dislike:#9e5c5c;
+  --star:#f5c518;--gold:rgba(245,197,24,.7);
+}
+html{scroll-behavior:smooth}
+body{background:var(--dark);color:var(--light);font-family:'Barlow',sans-serif;min-height:100vh}
+
+/* ── NAV ── */
+nav{
+  position:sticky;top:0;z-index:50;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 28px;
+  background:rgba(8,8,8,.96);backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--border);
+}
+nav img{height:28px}
+.nav-right{display:flex;gap:12px;align-items:center}
+.nav-link{color:var(--steel);font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;text-decoration:none;transition:color .2s}
+.nav-link:hover{color:var(--light)}
+.nav-badge{
+  background:rgba(245,197,24,.12);border:1px solid rgba(245,197,24,.3);
+  color:var(--star);font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;
+  padding:4px 10px;border-radius:2px;
+}
+
+/* ── HERO ── */
+.hero{padding:36px 28px 24px;border-bottom:1px solid var(--border)}
+.hero h1{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:2.2rem;letter-spacing:.06em;margin-bottom:6px}
+.hero p{color:var(--steel);font-size:.8rem;letter-spacing:.04em}
+.last-refresh{font-size:.65rem;color:rgba(143,163,177,.35);letter-spacing:.12em;margin-top:4px}
+
+/* ── LAYOUT ── */
+.dashboard{max-width:1200px;margin:0 auto;padding:24px 24px 80px;display:flex;flex-direction:column;gap:24px}
+
+/* ── STAT CARDS ── */
+.stat-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
+.stat-card{
+  background:var(--card);border:1px solid var(--border);border-radius:3px;
+  padding:18px 20px;
+}
+.stat-card .label{font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:var(--steel);margin-bottom:6px}
+.stat-card .value{font-family:'Cormorant Garamond',serif;font-size:2.4rem;font-weight:300;color:var(--light);line-height:1}
+.stat-card .sub{font-size:.65rem;color:rgba(143,163,177,.4);letter-spacing:.1em;margin-top:4px}
+.stat-card.star-card{border-color:rgba(245,197,24,.2);background:rgba(245,197,24,.04)}
+.stat-card.star-card .value{color:var(--star)}
+.stat-card.like-card{border-color:rgba(92,158,114,.2)}
+.stat-card.like-card .value{color:var(--like)}
+
+/* ── SECTION HEADER ── */
+.section-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding-bottom:12px;border-bottom:1px solid var(--border);margin-bottom:14px;
+}
+.section-head h2{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:300;letter-spacing:.06em}
+.section-head .count{font-size:.65rem;color:rgba(143,163,177,.4);letter-spacing:.16em;text-transform:uppercase}
+
+/* ── TABLES ── */
+.tbl-wrap{overflow-x:auto;border-radius:3px;border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:.76rem}
+thead tr{background:rgba(143,163,177,.06)}
+thead th{
+  padding:10px 14px;text-align:left;
+  font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--steel);
+  font-weight:400;border-bottom:1px solid var(--border);white-space:nowrap;
+}
+tbody tr{border-bottom:1px solid rgba(143,163,177,.06);transition:background .15s}
+tbody tr:hover{background:rgba(143,163,177,.04)}
+tbody tr:last-child{border-bottom:none}
+td{padding:10px 14px;color:rgba(242,240,235,.8);vertical-align:middle}
+td.mono{font-family:monospace;font-size:.7rem;color:rgba(143,163,177,.5)}
+.badge{
+  display:inline-block;padding:2px 8px;border-radius:2px;
+  font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;font-weight:500;
+}
+.badge.like{background:rgba(92,158,114,.15);color:var(--like);border:1px solid rgba(92,158,114,.25)}
+.badge.dislike{background:rgba(158,92,92,.15);color:var(--dislike);border:1px solid rgba(158,92,92,.25)}
+.badge.star{background:rgba(245,197,24,.1);color:var(--star);border:1px solid rgba(245,197,24,.2)}
+td.cat{color:var(--steel);font-size:.68rem;letter-spacing:.08em}
+
+/* ── STAR SUMMARY ── */
+.star-summary{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.star-block{
+  background:var(--card);border:1px solid rgba(245,197,24,.2);border-radius:3px;
+  padding:16px 20px;
+}
+.star-block .cat{font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(245,197,24,.5);margin-bottom:6px}
+.star-block .name{font-family:'Cormorant Garamond',serif;font-size:1.1rem;color:var(--light);margin-bottom:4px}
+.star-block .ts{font-size:.62rem;color:rgba(143,163,177,.35);letter-spacing:.1em}
+.star-block.empty .name{font-size:.78rem;color:rgba(143,163,177,.3);font-style:italic;font-family:'Barlow',sans-serif}
+
+/* ── VOTE LEADERBOARD ── */
+.leaderboard{display:flex;flex-direction:column;gap:6px}
+.lb-row{
+  display:flex;align-items:center;gap:12px;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:2px;padding:10px 14px;
+}
+.lb-rank{width:22px;font-size:.72rem;color:rgba(143,163,177,.35);text-align:center;flex-shrink:0}
+.lb-name{flex:1;font-size:.8rem;color:var(--light);min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lb-cat{font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(143,163,177,.4);flex-shrink:0;width:80px}
+.lb-bars{display:flex;flex-direction:column;gap:3px;width:120px;flex-shrink:0}
+.lb-bar-row{display:flex;align-items:center;gap:6px}
+.lb-bar-track{flex:1;height:3px;background:rgba(255,255,255,.04);border-radius:2px;overflow:hidden}
+.lb-bar-fill{height:100%;border-radius:2px}
+.lb-bar-fill.l{background:var(--like)}.lb-bar-fill.d{background:var(--dislike)}
+.lb-num{font-size:.65rem;color:rgba(143,163,177,.5);width:20px;text-align:right;flex-shrink:0}
+.lb-row.top-liked{border-color:rgba(92,158,114,.3);background:rgba(92,158,114,.04)}
+
+/* ── FEEDBACK CARDS ── */
+.fb-cards{display:flex;flex-direction:column;gap:10px}
+.fb-card{
+  background:var(--card);border:1px solid var(--border);border-radius:3px;
+  padding:16px 20px;
+}
+.fb-card .fb-row{display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start;margin-bottom:10px}
+.fb-card .fb-ts{font-size:.62rem;color:rgba(143,163,177,.3);letter-spacing:.1em;margin-left:auto}
+.fb-card .stars{color:var(--star);font-size:1rem;letter-spacing:2px;margin-bottom:8px}
+.fb-card .field-label{font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--steel);margin-bottom:3px}
+.fb-card .field-val{font-size:.8rem;color:rgba(242,240,235,.75);line-height:1.6}
+.fb-card .field-val.empty{color:rgba(143,163,177,.25);font-style:italic}
+.fb-section{margin-bottom:12px}
+
+/* ── CONTROLS ── */
+.ctrl-bar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:4px}
+.ctrl-btn{
+  padding:8px 22px;border:1px solid var(--border);background:transparent;
+  color:var(--steel);cursor:pointer;font-size:.68rem;letter-spacing:.16em;
+  text-transform:uppercase;border-radius:2px;transition:all .2s;font-family:'Barlow',sans-serif;
+}
+.ctrl-btn:hover{background:var(--steel);color:var(--dark)}
+.ctrl-btn.danger{border-color:rgba(158,92,92,.35);color:var(--dislike)}
+.ctrl-btn.danger:hover{background:var(--dislike);color:#fff;border-color:var(--dislike)}
+.ctrl-btn.primary{border-color:rgba(92,158,114,.4);color:var(--like)}
+.ctrl-btn.primary:hover{background:var(--like);color:#fff;border-color:var(--like)}
+
+/* ── EMPTY STATE ── */
+.empty-state{padding:32px;text-align:center;color:rgba(143,163,177,.3);font-size:.8rem;letter-spacing:.1em;background:var(--card);border:1px solid var(--border);border-radius:3px}
+
+/* ── SEARCH / FILTER ── */
+.filter-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.filter-input{
+  padding:7px 12px;background:rgba(0,0,0,.4);border:1px solid var(--border);
+  color:var(--light);font-family:'Barlow',sans-serif;font-size:.76rem;
+  border-radius:2px;outline:none;transition:border-color .2s;letter-spacing:.02em;
+  min-width:180px;
+}
+.filter-input:focus{border-color:rgba(143,163,177,.4)}
+.filter-select{
+  padding:7px 12px;background:rgba(0,0,0,.4);border:1px solid var(--border);
+  color:var(--steel);font-family:'Barlow',sans-serif;font-size:.72rem;
+  border-radius:2px;outline:none;cursor:pointer;letter-spacing:.08em;
+}
+
+/* ── PAGINATION ── */
+.pager{display:flex;gap:6px;align-items:center;margin-top:10px;flex-wrap:wrap}
+.pager-btn{
+  padding:5px 12px;border:1px solid var(--border);background:transparent;
+  color:var(--steel);cursor:pointer;font-size:.65rem;letter-spacing:.1em;
+  border-radius:2px;transition:all .2s;font-family:'Barlow',sans-serif;
+}
+.pager-btn.active{background:var(--steel);color:var(--dark);border-color:var(--steel)}
+.pager-btn:hover:not(.active){background:rgba(143,163,177,.1)}
+.pager-info{font-size:.65rem;color:rgba(143,163,177,.35);letter-spacing:.1em;margin-left:4px}
+</style>
+</head>
+<body>
+
+<nav>
+  <img src="/static/logo.png" alt="MI Logistics">
+  <div class="nav-right">
+    <span class="nav-badge">Admin Dashboard</span>
+    <a href="/results" class="nav-link">Results View</a>
+    <a href="/all-logos" class="nav-link">Review</a>
+    <a href="/" class="nav-link">Home</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <h1>MI Logistics — Review Dashboard</h1>
+  <p>Complete database view: all votes, starred favourites, and feedback submissions.</p>
+  <div class="last-refresh" id="last-refresh">Loading...</div>
+</div>
+
+<div class="dashboard">
+
+  <!-- CONTROLS -->
+  <div class="ctrl-bar">
+    <button class="ctrl-btn primary" onclick="loadAll()">↺ Refresh All</button>
+    <button class="ctrl-btn" onclick="exportCSV()">↓ Export CSV</button>
+    <button class="ctrl-btn danger" onclick="resetAll()">✕ Reset Database</button>
+  </div>
+
+  <!-- STAT OVERVIEW -->
+  <div class="stat-row" id="stat-row">
+    <div class="stat-card"><div class="label">Total Votes</div><div class="value" id="stat-votes">—</div><div class="sub">likes + passes</div></div>
+    <div class="stat-card like-card"><div class="label">Total Likes</div><div class="value" id="stat-likes">—</div><div class="sub">concepts liked</div></div>
+    <div class="stat-card"><div class="label">Total Passes</div><div class="value" id="stat-passes">—</div><div class="sub">concepts passed</div></div>
+    <div class="stat-card star-card"><div class="label">Stars Set</div><div class="value" id="stat-stars">—</div><div class="sub">of 3 required</div></div>
+    <div class="stat-card"><div class="label">Feedback</div><div class="value" id="stat-feedback">—</div><div class="sub">submissions</div></div>
+  </div>
+
+  <!-- STARRED FAVOURITES -->
+  <div>
+    <div class="section-head"><h2>⭐ Starred Favourites</h2><span class="count" id="stars-count"></span></div>
+    <div class="star-summary" id="star-summary">
+      <div class="empty-state">Loading...</div>
+    </div>
+  </div>
+
+  <!-- VOTE LEADERBOARD -->
+  <div>
+    <div class="section-head"><h2>🏆 Most Liked Concepts</h2><span class="count" id="lb-count"></span></div>
+    <div class="leaderboard" id="leaderboard">
+      <div class="empty-state">Loading...</div>
+    </div>
+  </div>
+
+  <!-- ALL VOTES TABLE -->
+  <div>
+    <div class="section-head"><h2>📊 All Votes — Raw Records</h2><span class="count" id="votes-count"></span></div>
+    <div class="filter-row">
+      <input class="filter-input" id="votes-search" type="text" placeholder="Filter by name or category..." oninput="filterVotes()">
+      <select class="filter-select" id="votes-cat-filter" onchange="filterVotes()">
+        <option value="">All Categories</option>
+        <option value="logo-ideas">Logo Ideas</option>
+        <option value="regal">Corporate &amp; Regal</option>
+        <option value="truck-display">Truck Display</option>
+      </select>
+      <select class="filter-select" id="votes-resp-filter" onchange="filterVotes()">
+        <option value="">All Responses</option>
+        <option value="like">Likes Only</option>
+        <option value="dislike">Passes Only</option>
+      </select>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th>#</th><th>Category</th><th>Concept Name</th><th>Response</th><th>Timestamp</th>
+        </tr></thead>
+        <tbody id="votes-tbody"></tbody>
+      </table>
+    </div>
+    <div class="pager" id="votes-pager"></div>
+  </div>
+
+  <!-- FEEDBACK TABLE -->
+  <div>
+    <div class="section-head"><h2>💬 Feedback Submissions</h2><span class="count" id="fb-count"></span></div>
+    <div class="fb-cards" id="fb-cards">
+      <div class="empty-state">Loading...</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const CAT_LABELS = {
+  'logo-ideas':'Logo Ideas',
+  'regal':'Corporate & Regal',
+  'truck-display':'Truck Display'
+};
+
+let allVotes = [];
+let vPage = 1;
+const VPAGE_SIZE = 25;
+
+async function loadAll() {
+  document.getElementById('last-refresh').textContent = 'Refreshing...';
+  try {
+    const data = await fetch('/api/admin-data').then(r => r.json());
+    renderStats(data);
+    renderStars(data.stars);
+    renderLeaderboard(data.votes);
+    allVotes = data.votes;
+    vPage = 1;
+    filterVotes();
+    renderFeedback(data.feedback);
+    document.getElementById('last-refresh').textContent =
+      'Last refreshed: ' + new Date().toLocaleTimeString();
+  } catch(e) {
+    document.getElementById('last-refresh').textContent = 'Error loading data.';
+  }
+}
+
+function renderStats(data) {
+  const likes   = data.votes.filter(v => v.response === 'like').length;
+  const dislikes = data.votes.filter(v => v.response === 'dislike').length;
+  document.getElementById('stat-votes').textContent    = data.votes.length;
+  document.getElementById('stat-likes').textContent    = likes;
+  document.getElementById('stat-passes').textContent   = dislikes;
+  document.getElementById('stat-stars').textContent    = data.stars.length + '/3';
+  document.getElementById('stat-feedback').textContent = data.feedback.length;
+}
+
+function renderStars(stars) {
+  const cats = ['logo-ideas','regal','truck-display'];
+  const bycat = {};
+  stars.forEach(s => bycat[s.category] = s);
+  const el = document.getElementById('star-summary');
+  el.innerHTML = cats.map(cat => {
+    const s = bycat[cat];
+    if(s) return `
+      <div class="star-block">
+        <div class="cat">${CAT_LABELS[cat]||cat}</div>
+        <div class="name">★ ${s.logo_name}</div>
+        <div class="ts">${fmtTime(s.timestamp)}</div>
+      </div>`;
+    return `
+      <div class="star-block empty">
+        <div class="cat">${CAT_LABELS[cat]||cat}</div>
+        <div class="name">Not selected yet</div>
+      </div>`;
+  }).join('');
+  document.getElementById('stars-count').textContent = `${stars.length} / 3 selected`;
+}
+
+function renderLeaderboard(votes) {
+  // Group by category + logo_name
+  const map = {};
+  votes.forEach(v => {
+    const key = v.category + '|' + v.logo_name;
+    if(!map[key]) map[key] = { name:v.logo_name, cat:v.category, likes:0, dislikes:0 };
+    if(v.response==='like') map[key].likes++;
+    else map[key].dislikes++;
+  });
+  const sorted = Object.values(map)
+    .filter(r => r.likes > 0)
+    .sort((a,b) => b.likes - a.likes)
+    .slice(0, 15);
+  const maxLikes = Math.max(...sorted.map(r=>r.likes), 1);
+  const el = document.getElementById('leaderboard');
+  document.getElementById('lb-count').textContent = sorted.length + ' concepts with likes';
+  if(!sorted.length){ el.innerHTML='<div class="empty-state">No votes recorded yet</div>'; return; }
+  el.innerHTML = sorted.map((r,i) => `
+    <div class="lb-row${i===0?' top-liked':''}">
+      <div class="lb-rank">${i+1}</div>
+      <div class="lb-name">${r.name}</div>
+      <div class="lb-cat">${CAT_LABELS[r.cat]||r.cat}</div>
+      <div class="lb-bars">
+        <div class="lb-bar-row">
+          <div class="lb-bar-track"><div class="lb-bar-fill l" style="width:${Math.round(r.likes/maxLikes*100)}%"></div></div>
+          <div class="lb-num">${r.likes}</div>
+        </div>
+        <div class="lb-bar-row">
+          <div class="lb-bar-track"><div class="lb-bar-fill d" style="width:${r.dislikes?Math.round(r.dislikes/maxLikes*100):0}%"></div></div>
+          <div class="lb-num">${r.dislikes}</div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function filterVotes() {
+  const search = document.getElementById('votes-search').value.toLowerCase();
+  const cat    = document.getElementById('votes-cat-filter').value;
+  const resp   = document.getElementById('votes-resp-filter').value;
+  const filtered = allVotes.filter(v => {
+    if(cat  && v.category !== cat) return false;
+    if(resp && v.response !== resp) return false;
+    if(search && !v.logo_name.toLowerCase().includes(search) && !v.category.includes(search)) return false;
+    return true;
+  });
+  document.getElementById('votes-count').textContent = filtered.length + ' records';
+  renderVotesPage(filtered, vPage);
+}
+
+function renderVotesPage(filtered, page) {
+  const total = filtered.length;
+  const pages = Math.ceil(total / VPAGE_SIZE) || 1;
+  page = Math.min(page, pages);
+  vPage = page;
+  const slice = filtered.slice((page-1)*VPAGE_SIZE, page*VPAGE_SIZE);
+  const tbody = document.getElementById('votes-tbody');
+  if(!total){ tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:rgba(143,163,177,.3);padding:24px">No records found</td></tr>'; }
+  else {
+    tbody.innerHTML = slice.map((v,i) => `
+      <tr>
+        <td class="mono">${(page-1)*VPAGE_SIZE + i + 1}</td>
+        <td class="cat">${CAT_LABELS[v.category]||v.category}</td>
+        <td>${v.logo_name}</td>
+        <td><span class="badge ${v.response}">${v.response==='like'?'♥ Like':'✕ Pass'}</span></td>
+        <td class="mono">${fmtTime(v.timestamp)}</td>
+      </tr>`).join('');
+  }
+  // Pager
+  const pager = document.getElementById('votes-pager');
+  if(pages <= 1){ pager.innerHTML=''; return; }
+  const btns = [];
+  if(page>1) btns.push(`<button class="pager-btn" onclick="goVotePage(${page-1})">← Prev</button>`);
+  for(let p=1;p<=pages;p++){
+    if(p===page||Math.abs(p-page)<=1||p===1||p===pages)
+      btns.push(`<button class="pager-btn${p===page?' active':''}" onclick="goVotePage(${p})">${p}</button>`);
+    else if(Math.abs(p-page)===2)
+      btns.push(`<span style="color:rgba(143,163,177,.3);padding:0 4px">…</span>`);
+  }
+  if(page<pages) btns.push(`<button class="pager-btn" onclick="goVotePage(${page+1})">Next →</button>`);
+  btns.push(`<span class="pager-info">${total} records · page ${page}/${pages}</span>`);
+  pager.innerHTML = btns.join('');
+}
+
+function goVotePage(p) { vPage=p; filterVotes(); }
+
+function renderFeedback(feedback) {
+  const el = document.getElementById('fb-cards');
+  document.getElementById('fb-count').textContent = feedback.length + ' submission' + (feedback.length!==1?'s':'');
+  if(!feedback.length){ el.innerHTML='<div class="empty-state">No feedback submitted yet</div>'; return; }
+  el.innerHTML = feedback.map(f => {
+    const stars = '★'.repeat(f.playlist_rating||0) + '☆'.repeat(5-(f.playlist_rating||0));
+    return `
+    <div class="fb-card">
+      <div class="fb-row">
+        <div>
+          <div class="field-label">Playlist Rating</div>
+          <div class="stars" title="${f.playlist_rating||0}/5 stars">${stars}</div>
+        </div>
+        <div class="fb-ts">${fmtTime(f.timestamp)}</div>
+      </div>
+      <div class="fb-section">
+        <div class="field-label">Colour / Design Changes</div>
+        <div class="field-val${!f.colour_changes?' empty':''}">${f.colour_changes||'No input provided'}</div>
+      </div>
+      <div class="fb-section">
+        <div class="field-label">Further Requests &amp; Comments</div>
+        <div class="field-val${!f.further_requests?' empty':''}">${f.further_requests||'No input provided'}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function fmtTime(ts) {
+  if(!ts) return '—';
+  try{
+    const d = new Date(ts);
+    return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) + ' ' +
+           d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+  }catch{ return ts; }
+}
+
+function exportCSV() {
+  // Build CSV from all votes + stars + feedback
+  let csv = 'Type,Category,Name,Response,Timestamp\n';
+  allVotes.forEach(v => {
+    csv += `Vote,${v.category},"${v.logo_name}",${v.response},${v.timestamp}\n`;
+  });
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = 'mi_logistics_review_' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+}
+
+async function resetAll() {
+  if(!confirm('RESET ALL data?\n\nThis will delete all votes, stars, and feedback permanently.')) return;
+  await fetch('/api/reset', {method:'POST'});
+  loadAll();
+}
+
+loadAll();
+// Auto-refresh every 30 seconds
+setInterval(loadAll, 30000);
+</script>
+</body>
+</html>

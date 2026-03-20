@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MI Logistics – Brand Review</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+  :root { --steel:#8fa3b1; --dark:#0d0d0d; --light:#f2f0eb; }
+
+  html, body {
+    width:100%; height:100%;
+    background:#000;
+    overflow:hidden;
+    font-family:'Barlow', sans-serif;
+  }
+
+  /* ─────────────────────────────────────
+     FLASH — top layer, strobe pulses
+  ───────────────────────────────────── */
+  #flash {
+    position:fixed; inset:0; z-index:400;
+    background:#fff;
+    opacity:0;
+    pointer-events:none;
+  }
+
+  /* ─────────────────────────────────────
+     VIDEO WRAP — centred, fixed size
+     Starts as small box in the middle,
+     morphs to fill 100% × 100vh
+  ───────────────────────────────────── */
+  #video-wrap {
+    position:fixed;
+    top:50%; left:50%;
+    transform:translate(-50%, -50%) scale(1);
+    transform-origin:center center;
+    width:80vw;
+    height:80vh;
+    z-index:30;
+    background:#000;
+    opacity:0;
+    transition: opacity 2.5s ease;
+    will-change:opacity;
+  }
+
+  #hero-video {
+    width:100%;
+    height:80vh;
+    object-fit:contain;
+    object-position:bottom;
+    background:#000;
+    display:block;
+  }
+
+  /* ─────────────────────────────────────
+     LOGO STROBE — all 12, full screen,
+     sits in FRONT of video during intro
+  ───────────────────────────────────── */
+  #strobe-layer {
+    position:fixed; inset:0; z-index:50;
+    display:flex; align-items:center; justify-content:center;
+    background:#000;
+    /* NO transition — hard instant swaps */
+  }
+
+  #strobe-img {
+    /* fills screen edge to edge */
+    width:100vw;
+    height:100vh;
+    object-fit:contain;
+    display:block;
+    will-change:opacity;
+  }
+
+  /* ─────────────────────────────────────
+     CONTINUE OVERLAY
+  ───────────────────────────────────── */
+  #overlay {
+    position:fixed; inset:0; z-index:200;
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    background:rgba(0,0,0,.62);
+    backdrop-filter:blur(5px);
+    opacity:0; pointer-events:none;
+    transition:opacity 0.9s ease;
+  }
+  #overlay.active { opacity:1; pointer-events:all; }
+
+  #float-logo {
+    margin-bottom:30px;
+    transform:translateY(-16px) scale(0.82);
+    opacity:0;
+    transition:transform 1.1s cubic-bezier(.16,1,.3,1),
+               opacity 0.9s ease;
+  }
+  #float-logo.risen { transform:translateY(0) scale(1); opacity:1; }
+  #float-logo img {
+    width:clamp(90px,12vw,140px);
+    filter:brightness(1.2) drop-shadow(0 4px 24px rgba(143,163,177,.6));
+  }
+
+  .continue-card {
+    background:rgba(8,8,8,.93);
+    border:1px solid rgba(143,163,177,.22);
+    backdrop-filter:blur(24px);
+    padding:44px 54px; text-align:center;
+    max-width:420px; width:90%;
+    transform:translateY(26px); opacity:0;
+    transition:transform 1s cubic-bezier(.16,1,.3,1) 0.2s,
+               opacity 0.8s ease 0.2s;
+  }
+  .continue-card.risen { transform:translateY(0); opacity:1; }
+  .continue-card h2 {
+    font-family:'Cormorant Garamond',serif;
+    font-weight:300; font-size:clamp(1.4rem,3vw,2rem);
+    color:var(--light); letter-spacing:.06em; margin-bottom:18px;
+  }
+  .instructions {
+    color:var(--steel); font-size:.79rem;
+    line-height:1.9; letter-spacing:.03em; margin-bottom:32px;
+  }
+  .instructions span { display:block; padding:2px 0; }
+  .instructions .num { color:rgba(200,216,228,.5); margin-right:8px; font-weight:500; }
+  .btn-continue {
+    display:inline-block; padding:13px 44px;
+    background:transparent; border:1px solid var(--steel);
+    color:var(--light); font-family:'Barlow',sans-serif;
+    font-size:.77rem; letter-spacing:.26em;
+    text-transform:uppercase; text-decoration:none; cursor:pointer;
+    transition:background .28s, color .28s, box-shadow .28s;
+  }
+  .btn-continue:hover {
+    background:var(--steel); color:var(--dark);
+    box-shadow:0 0 28px rgba(143,163,177,.35);
+  }
+
+  /* thin progress line along bottom */
+  #prog {
+    position:fixed; bottom:0; left:0; z-index:300;
+    height:2px; width:0%; background:var(--steel);
+    opacity:0.45; pointer-events:none;
+  }
+</style>
+</head>
+<body>
+
+<!-- ══ START GATE — must click before anything plays ══ -->
+<div id="start-gate" style="
+  position:fixed;inset:0;z-index:999;
+  background:#000;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;
+">
+  <img src="/static/logo_09_steel.png" alt="MI Logistics"
+       style="height:80px;opacity:.85;animation:pulse 2s ease-in-out infinite">
+  <div style="font-family:'Cormorant Garamond',serif;font-size:clamp(1.4rem,4vw,2rem);font-weight:300;letter-spacing:.12em;color:#f2f0eb;text-align:center">
+    MI Logistics<br>
+    <span style="font-size:.7em;color:#8fa3b1;letter-spacing:.22em;text-transform:uppercase">Brand Vision Review</span>
+  </div>
+  <button id="start-btn" onclick="startApp()" style="
+    margin-top:12px;
+    padding:16px 64px;
+    background:transparent;
+    border:1px solid #8fa3b1;
+    color:#f2f0eb;
+    font-family:'Barlow',sans-serif;
+    font-size:.85rem;letter-spacing:.35em;text-transform:uppercase;
+    cursor:pointer;border-radius:2px;
+    transition:background .3s,box-shadow .3s;
+  "
+  onmouseover="this.style.background='rgba(143,163,177,.15)';this.style.boxShadow='0 0 30px rgba(143,163,177,.2)'"
+  onmouseout="this.style.background='transparent';this.style.boxShadow='none'"
+  >▶ &nbsp; Start</button>
+  <div style="font-size:.6rem;color:rgba(143,163,177,.35);letter-spacing:.18em;text-transform:uppercase">
+    🔊 Sound on recommended
+  </div>
+</div>
+
+<style>
+@keyframes pulse{0%,100%{opacity:.75}50%{opacity:1}}
+</style>
+
+<div id="flash"></div>
+<div id="prog"></div>
+
+<!-- VIDEO — behind logos, morphs forward -->
+<div id="video-wrap">
+  <video id="hero-video"
+         src="/static/intro_video.mp4"
+         playsinline preload="auto" muted></video>
+</div>
+
+<!-- LOGO STROBE — in front -->
+<div id="strobe-layer">
+  <img id="strobe-img" src="/static/logo_09_steel.png" alt="">
+</div>
+
+<!-- CONTINUE OVERLAY -->
+<div id="overlay">
+  <div id="float-logo">
+    <img src="/static/logo_09_steel.png" alt="MI Logistics">
+  </div>
+  <div class="continue-card" id="continue-card">
+    <h2>Brand Vision Review</h2>
+    <div class="instructions">
+      <span><span class="num">01</span>Use ← → arrows to browse each concept</span>
+      <span><span class="num">02</span>Click ♥ <strong>Like</strong> or ✕ <strong>Pass</strong> — slides to next automatically</span>
+      <span><span class="num">03</span>Click any image to <strong>enlarge</strong> it</span>
+      <span><span class="num">04</span>Switch between <strong>Logos · Regal · Trucks</strong> using the tabs</span>
+      <span><span class="num">05</span>★ <strong>Star your favourite</strong> in each category — this is mandatory</span>
+      <span><span class="num">06</span>Click <strong>Finished</strong> when done — your results are saved</span>
+      <span style="margin-top:10px;color:rgba(245,197,24,.7);font-size:.75rem">🎵 All songs in the M1 Logistics playlist are made for and powered by M1 Logistics — enjoy!</span>
+    </div>
+    <a href="/all-logos" class="btn-continue">Begin Review</a>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════
+//  ALL 12 LOGOS — alternating with distinct bgs
+// ══════════════════════════════════════════════════
+const LOGOS = [
+  { src:'/static/logo_13_woven.png',     bg:'#e8e8e8' },
+  { src:'/static/logo_01_chrome.png',    bg:'#1a0000' },
+  { src:'/static/logo_14_circuit2.png',  bg:'#ffffff' },
+  { src:'/static/logo_09_steel.png',     bg:'#ffffff' },
+  { src:'/static/logo_15_globe.png',     bg:'#ffffff' },
+  { src:'/static/logo_02_tech.png',      bg:'#000d14' },
+  { src:'/static/logo_16_speed.png',     bg:'#f0f0f0' },
+  { src:'/static/logo_08_silver.png',    bg:'#080808' },
+  { src:'/static/logo_17_3d.png',        bg:'#f2f2f2' },
+  { src:'/static/logo_03_world.png',     bg:'#060b1c' },
+  { src:'/static/logo_18_navy_gold.png', bg:'#0a0a0a' },
+  { src:'/static/logo_11_uj_ornate.png', bg:'#0c0008' },
+  { src:'/static/logo_19_navy_blue.png', bg:'#0a0a0a' },
+  { src:'/static/logo_04_uj_rope.png',   bg:'#ffffff' },
+  { src:'/static/logo_20_teal_dark.png', bg:'#050505' },
+  { src:'/static/logo_12_london.png',    bg:'#f2f0eb' },
+  { src:'/static/logo_21_purple.png',    bg:'#080808' },
+  { src:'/static/logo_05_tile.png',      bg:'#ffffff' },
+  { src:'/static/logo_06_red.png',       bg:'#000000' },
+  { src:'/static/logo_10_uj_small.png',  bg:'#e8e4dc' },
+  { src:'/static/logo_07_ornate.png',    bg:'#07071a' },
+];
+
+// ══════════════════════════════════════════════════
+//  TIMING
+// ══════════════════════════════════════════════════
+const STROBE_MS      = 65;    // ms per logo (≈15 fps strobe)
+const MORPH_AT_MS    = 4000;  // when video starts morphing forward
+const MORPH_DUR_MS   = 900;   // duration of scale morph
+const PLAY_DELAY_MS  = 200;   // tiny pause after morph before play
+
+// ══════════════════════════════════════════════════
+//  UTILS
+// ══════════════════════════════════════════════════
+const $     = id => document.getElementById(id);
+const sleep = ms  => new Promise(r => setTimeout(r, ms));
+let continueFired = false;
+
+// Preload all images into browser cache
+LOGOS.forEach(l => { const img = new Image(); img.src = l.src; });
+
+// ══════════════════════════════════════════════════
+//  STROBE ENGINE
+// ══════════════════════════════════════════════════
+let strobeIdx    = 0;
+let strobeActive = true;
+let strobeTimer  = null;
+
+function strobeStep() {
+  if (!strobeActive) return;
+  const L            = LOGOS[strobeIdx % LOGOS.length];
+  $('strobe-img').src              = L.src;
+  $('strobe-layer').style.background = L.bg;
+  strobeIdx++;
+  strobeTimer = setTimeout(strobeStep, STROBE_MS);
+}
+
+function stopStrobe() {
+  strobeActive = false;
+  clearTimeout(strobeTimer);
+  const sl = $('strobe-layer');
+  sl.style.transition = 'opacity 500ms ease';
+  sl.style.opacity    = '0';
+  // remove from hit-testing after fade
+  setTimeout(() => sl.style.display = 'none', 520);
+}
+
+// ══════════════════════════════════════════════════
+//  FLASH HITS — white punches to punctuate strobe
+// ══════════════════════════════════════════════════
+function flashHit(strength, decayMs) {
+  const f = $('flash');
+  f.style.transition = 'none';
+  f.style.opacity    = String(strength);
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    f.style.transition = `opacity ${decayMs}ms ease`;
+    f.style.opacity    = '0';
+  }));
+}
+
+// ══════════════════════════════════════════════════
+//  MAIN SEQUENCE
+// ══════════════════════════════════════════════════
+async function runSequence() {
+  const video = $('hero-video');
+  const wrap  = $('video-wrap');
+
+  // Pre-load video, hold on first frame
+  video.currentTime = 0.001;
+  video.pause();
+
+  // Start strobe immediately
+  strobeStep();
+
+  // Progress bar across morph period
+  const pb = $('prog');
+  pb.style.transition = `width ${MORPH_AT_MS}ms linear`;
+  pb.style.width      = '100%';
+
+  // Scattered flash hits during strobe
+  setTimeout(() => flashHit(0.85, 70),   800);
+  setTimeout(() => flashHit(0.95, 80),  1800);
+  setTimeout(() => flashHit(1.00, 90),  2900);
+  setTimeout(() => flashHit(0.80, 60),  3500);
+
+  // ── At 4s: VIDEO MORPHS FORWARD ─────────────
+  await sleep(MORPH_AT_MS);
+
+  // Make video-wrap visible and start growing from tiny
+  wrap.style.opacity    = '1';
+  wrap.style.transition = `transform ${MORPH_DUR_MS}ms cubic-bezier(.2,.8,.3,1),
+                            opacity  200ms ease`;
+  wrap.style.transform  = 'translate(-50%, -50%) scale(1)';
+
+  // Big white flash at the moment video hits full size
+  setTimeout(() => {
+    flashHit(1.0, 120);
+    stopStrobe(); // logos fade out as flash peaks
+  }, MORPH_DUR_MS * 0.75);
+
+  // Wait for morph + tiny settle
+  await sleep(MORPH_DUR_MS + PLAY_DELAY_MS);
+
+  // ── PLAY ────────────────────────────────────
+  video.play();
+  video.addEventListener('ended', showContinue, { once: true });
+  setTimeout(showContinue, 60000); // safety fallback
+}
+
+// ══════════════════════════════════════════════════
+//  CONTINUE OVERLAY
+// ══════════════════════════════════════════════════
+async function showContinue() {
+  if (continueFired) return;
+  continueFired = true;
+  $('overlay').classList.add('active');
+  await sleep(180);
+  $('float-logo').classList.add('risen');
+  $('continue-card').classList.add('risen');
+}
+
+
+// ── START GATE — button click unlocks audio and begins the experience ──
+let audioStarted = false;
+
+function startApp() {
+  // Hide start gate
+  const gate = document.getElementById('start-gate');
+  gate.style.transition = 'opacity .6s ease';
+  gate.style.opacity = '0';
+  setTimeout(() => gate.style.display = 'none', 650);
+
+  // ── AUDIO — truck idle immediately, startup 2s later ──
+  if(!audioStarted) {
+    audioStarted = true;
+    const idle = new Audio('/static/truck_idle.mp3');
+    idle.volume = 0.42;
+    idle.loop = true;
+    idle.play().catch(() => {});
+
+    setTimeout(() => {
+      const startup = new Audio('/static/startup.mp3');
+      startup.volume = 0.70;
+      startup.play().catch(() => {});
+    }, 2000);
+
+    window.addEventListener('beforeunload', () => idle.pause());
+  }
+
+  // ── BEGIN STROBE + VIDEO SEQUENCE ──
+  beginExperience();
+}
+
+// Re-trigger audio on navigate-back (pageshow from bfcache)
+window.addEventListener('pageshow', (e) => {
+  if(e.persisted) {
+    // Page came from back-forward cache — show start gate again
+    const gate = document.getElementById('start-gate');
+    if(gate) { gate.style.opacity='1'; gate.style.display='flex'; audioStarted=false; }
+  }
+});
+
+function beginExperience() {
+  const video  = $('hero-video');
+  const wrap   = $('video-wrap');
+  const strobe = $('strobe-layer');
+
+  strobeStep();
+  video.muted = true;
+  video.preload = 'auto';
+
+  setTimeout(() => {
+    strobe.style.transition = 'opacity 2.5s ease';
+    strobe.style.opacity    = '0';
+    wrap.style.opacity = '1';
+
+    setTimeout(() => {
+      strobeActive = false;
+      clearTimeout(strobeTimer);
+      strobe.style.display = 'none';
+
+      const pp = video.play();
+      if(pp !== undefined) {
+        pp.then(() => {
+          video.addEventListener('ended', showContinue, { once: true });
+          setTimeout(showContinue, 90000);
+        }).catch(() => showContinue());
+      } else {
+        video.addEventListener('ended', showContinue, { once: true });
+        setTimeout(showContinue, 90000);
+      }
+    }, 2600);
+  }, 6000);
+}
+
+// ── BOOT — just pre-load assets, wait for button ──
+window.addEventListener('load', () => {
+  // Pre-load audio files silently
+  ['truck_idle','startup'].forEach(f => {
+    const a = new Audio('/static/' + f + '.mp3');
+    a.preload = 'auto';
+    a.volume = 0;
+    // Don't play — just cache
+  });
+});
+</script>
+</body>
+</html>
